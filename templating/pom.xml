@@ -9,8 +9,14 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>zscript-util-misc</artifactId>
-    <name>Zscript Utilities (Misc)</name>
+    <artifactId>zscript-templating</artifactId>
+    <packaging>pom</packaging>
+    <name>Templating Plugin</name>
+
+    <modules>
+        <module>templating-maven-plugin</module>
+        <module>templating-maven-plugin-adapter</module>
+    </modules>
 
     <dependencies>
         <dependency>

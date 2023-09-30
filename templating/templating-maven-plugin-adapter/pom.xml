@@ -5,20 +5,17 @@
 
     <parent>
         <groupId>net.zscript</groupId>
-        <artifactId>zscript-util</artifactId>
+        <artifactId>zscript-templating</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>zscript-util-misc</artifactId>
-    <name>Zscript Utilities (Misc)</name>
+    <artifactId>templating-maven-plugin-adapter</artifactId>
+    <name>Maven Templating Plugin Adapter</name>
 
     <dependencies>
         <dependency>
-            <groupId>net.zscript</groupId>
-            <artifactId>java-testing-deps</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-            <type>pom</type>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
         </dependency>
     </dependencies>
 </project>
