@@ -1,0 +1,32 @@
+receipt: Classpath example
+date: 2023-03-16
+customer:
+    first_name: Joe
+    family_name: Bloggs
+
+items:
+-   part_no: A4786
+    descrip: Water Bucket (Filled)
+    price: 1.47
+    quantity: 4
+
+-   part_no: E1628
+    descrip: High Heeled "Ruby" Slippers
+    size: 8
+    price: 133.7
+    quantity: 1
+
+bill-to: &id001
+    street: |
+        31 Cat Road
+        Suite 16
+    city: East Centerville
+    state: KS
+
+ship-to: *id001
+
+specialDelivery: >
+    Follow the Yellow Brick
+    Road to the Emerald City.
+    Pay no attention to the
+    man behind the curtain.

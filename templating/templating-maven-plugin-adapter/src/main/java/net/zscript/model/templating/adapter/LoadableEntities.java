@@ -3,6 +3,7 @@ package net.zscript.model.templating.adapter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -16,7 +17,9 @@ public class LoadableEntities {
     private final List<String> relativePaths;
     private final String       fileTypeSuffix;
 
-    public LoadableEntities(String entityDescription, URI rootPath, List<String> relativePaths, String fileTypeSuffix) {
+    private final FileSystem fileSystem;
+
+    public LoadableEntities(String entityDescription, URI rootPath, List<String> relativePaths, String fileTypeSuffix, FileSystem fileSystem) {
         this.entityDescription = entityDescription;
         if (!rootPath.getPath().endsWith("/")) {
             throw new IllegalArgumentException("Invalid directory URI - missing '/'? " + rootPath);
@@ -24,6 +27,7 @@ public class LoadableEntities {
         this.rootPath = rootPath;
         this.relativePaths = relativePaths;
         this.fileTypeSuffix = fileTypeSuffix;
+        this.fileSystem = fileSystem;
     }
 
     public List<LoadedEntityContent> loadEntities(Function<LoadableEntity, List<LoadedEntityContent>> loader) {
@@ -38,7 +42,7 @@ public class LoadableEntities {
         private final String relativePath;
 
         public LoadableEntity(String relativePath) {
-            if (Path.of(relativePath).isAbsolute()) {
+            if (fileSystem.getPath(relativePath).isAbsolute()) {
                 throw new IllegalArgumentException("relativePath is absolute: " + relativePath);
             }
             this.relativePath = relativePath;
@@ -58,6 +62,10 @@ public class LoadableEntities {
 
         public String getFileTypeSuffix() {
             return fileTypeSuffix;
+        }
+
+        public FileSystem getFileSystem() {
+            return fileSystem;
         }
 
         public URI getFullPath() {

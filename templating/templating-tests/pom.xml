@@ -12,8 +12,10 @@
     <artifactId>templating-maven-plugin-tests</artifactId>
     <name>Maven Templating Plugin Tests</name>
 
-    <dependencies>
-    </dependencies>
+    <properties>
+        <generated-code-path>${project.build.directory}/generated-sources/zscript</generated-code-path>
+        <generated-text-path>${project.build.directory}/classes/templates-out</generated-text-path>
+    </properties>
 
     <build>
         <plugins>
@@ -22,9 +24,6 @@
                 <artifactId>templating-maven-plugin</artifactId>
                 <version>${project.version}</version>
 
-                <configuration>
-                </configuration>
-
                 <executions>
                     <execution>
                         <id>templating-test-1-default-dirs</id>
@@ -32,51 +31,30 @@
                             <goal>transform</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${generated-code-path}/test1</outputDirectory>
+                            <outputDirectory>${generated-text-path}/test1</outputDirectory>
+                            <mainTemplate>test-1.mustache</mainTemplate>
                             <fileTypeSuffix>txt</fileTypeSuffix>
-                            <templates>
-                                <includes>sample1.mustache</includes>
-                            </templates>
                             <contexts>
-                                <includes>**/s*1?.yaml</includes>
+                                <includes>**/e*-1.yaml</includes>
                             </contexts>
                         </configuration>
                     </execution>
-                    <!--                    <execution>-->
-                    <!--                        <id>templating-zstatus-cpp</id>-->
-                    <!--                        <goals>-->
-                    <!--                            <goal>transform</goal>-->
-                    <!--                        </goals>-->
-                    <!--                        <configuration>-->
-                    <!--                            <outputDirectory>${generated-code-path}/test1</outputDirectory>-->
-                    <!--                            <templates>-->
-                    <!--                                <directory>${project.basedir}/src/main/templates</directory>-->
-                    <!--                                <includes>CppZscriptStatus.mustache</includes>-->
-                    <!--                            </templates>-->
-                    <!--                            <contexts>-->
-                    <!--                                <includes>zstatus-list.yaml</includes>-->
-                    <!--                            </contexts>-->
-                    <!--                        </configuration>-->
-                    <!--                    </execution>-->
-                    <!--                    <execution>-->
-                    <!--                        <id>templating-modules-cpp</id>-->
-                    <!--                        <goals>-->
-                    <!--                            <goal>transform</goal>-->
-                    <!--                        </goals>-->
-                    <!--                        <configuration>-->
-                    <!--                            <templates>-->
-                    <!--                                <directory>${project.basedir}/src/main/templates</directory>-->
-                    <!--                                <includes>CppCommandKeyDefs.mustache</includes>-->
-                    <!--                            </templates>-->
-                    <!--                            <contexts>-->
-                    <!--                                <directory>classpath:/zscript-datamodel/</directory>-->
-                    <!--                                <includes>module-list.yaml</includes>-->
-                    <!--                            </contexts>-->
-                    <!--                        </configuration>-->
-                    <!--                    </execution>-->
+                    <execution>
+                        <id>templating-test-3-additional-templates</id>
+                        <goals>
+                            <goal>transform</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${generated-text-path}/test3</outputDirectory>
+                            <mainTemplate>test3/test-3.mustache</mainTemplate>
+                            <fileTypeSuffix>txt</fileTypeSuffix>
+                            <contexts>
+                                <includes>exampleA-1.yaml</includes>
+                            </contexts>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
 </project>

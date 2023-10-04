@@ -10,9 +10,9 @@ import org.apache.maven.plugins.annotations.Mojo;
 @Mojo(name = "transform", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class TemplatingMojo extends TemplatingBaseMojo {
 
-    private static final String TEMPLATE_DEFAULT_DIR = "src/main/templates";
-    private static final String CONTEXT_DEFAULT_DIR  = "src/main/contexts";
-    private static final String OUTPUT_DEFAULT_DIR   = "generated-sources/java";
+    static final String TEMPLATE_DEFAULT_DIR = "src/main/templates";
+    static final String CONTEXT_DEFAULT_DIR  = "src/main/contexts";
+    static final String OUTPUT_DEFAULT_DIR   = "generated-sources/java";
 
     /**
      * Specify output directory where the transformed output files are placed. This is added to the Maven Compile Source Root list if the {@code fileTypeSuffix} is "java".
@@ -20,7 +20,8 @@ public class TemplatingMojo extends TemplatingBaseMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
-        String outputDirectoryPath = executeBase(TEMPLATE_DEFAULT_DIR, CONTEXT_DEFAULT_DIR, OUTPUT_DEFAULT_DIR);
+        templateRootDirs.add(TEMPLATE_DEFAULT_DIR);
+        String outputDirectoryPath = executeBase(CONTEXT_DEFAULT_DIR, OUTPUT_DEFAULT_DIR);
         getLog().info("Main: generateSources: " + generateSources + ", fileTypeSuffix: " + fileTypeSuffix + ", outputDirectoryPath: " + outputDirectoryPath);
         if (outputDirectoryPath != null) {
             project.addCompileSourceRoot(outputDirectoryPath);

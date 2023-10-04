@@ -13,10 +13,26 @@
     <packaging>pom</packaging>
     <name>Templating Plugin</name>
 
+    <properties>
+        <version.mustache>0.9.10</version.mustache>
+    </properties>
+    
     <modules>
         <module>templating-maven-plugin</module>
         <module>templating-maven-plugin-adapter</module>
+        <module>templating-tests</module>
+        <module>templating-tests-2</module>
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.github.spullara.mustache.java</groupId>
+                <artifactId>compiler</artifactId>
+                <version>${version.mustache}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>

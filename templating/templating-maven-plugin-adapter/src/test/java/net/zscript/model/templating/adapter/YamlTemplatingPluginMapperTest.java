@@ -27,7 +27,7 @@ class YamlTemplatingPluginMapperTest {
         final List<String> relPaths    = List.of("baz/a.yaml");
         final String       suffix      = "java";
 
-        final LoadableEntities           le     = new LoadableEntities("desc", rootPathUri, relPaths, suffix);
+        final LoadableEntities           le     = new LoadableEntities("desc", rootPathUri, relPaths, suffix, fs);
         final YamlTemplatingPluginMapper mapper = new YamlTemplatingPluginMapper();
 
         final Path yamlFile = fs.getPath("/foo", "baz", "a.yaml");
@@ -45,6 +45,6 @@ class YamlTemplatingPluginMapperTest {
         assertThat(context.get("b")).isInstanceOf(List.class).isEqualTo(List.of("x", "y"));
         assertThat(context.get("c")).isEqualTo("w3");
 
-        assertThat(loadedEntities.get(0).getRelativeOutputPath()).isEqualTo(Path.of("baz/a.java"));
+        assertThat(loadedEntities.get(0).getRelativeOutputPath()).isEqualTo(fs.getPath("baz/a.java"));
     }
 }
