@@ -1,0 +1,110 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.zscript.maven-templates</groupId>
+        <artifactId>mustache-templating</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>mustache-templating-maven-plugin-tests</artifactId>
+    <name>Maven Templating Plugin Tests</name>
+
+    <description>
+        Testing only - don't make this a dependency of any other projects!
+        The goal of this project is to ensure that executions of the plugin can find their resources properly
+        from both the filesystem and from the classpath.
+    </description>
+
+    <properties>
+        <generated-code-path>${project.build.directory}/generated-sources/zscript</generated-code-path>
+        <generated-text-path>${project.build.directory}/classes/templates-out</generated-text-path>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.github.spullara.mustache.java</groupId>
+            <artifactId>compiler</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.zscript.maven-templates</groupId>
+            <artifactId>mustache-templating-maven-plugin-test-resources</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>net.zscript.maven-templates</groupId>
+                <artifactId>mustache-templating-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.zscript.maven-templates</groupId>
+                        <artifactId>mustache-templating-maven-plugin-test-resources</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
+
+                <executions>
+                    <execution>
+                        <id>templating-test-1-default-dirs</id>
+                        <goals>
+                            <goal>transform</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${generated-text-path}/test1</outputDirectory>
+                            <mainTemplate>test-1.mustache</mainTemplate>
+                            <fileTypeSuffix>txt</fileTypeSuffix>
+                            <contexts>
+                                <includes>**/e*-1.yaml</includes>
+                            </contexts>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>templating-test-2-classpath</id>
+                        <goals>
+                            <goal>transform</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${generated-text-path}/test2</outputDirectory>
+                            <templateDirectory>classpath:/template-cp</templateDirectory>
+                            <mainTemplate>test-2-cp.mustache</mainTemplate>
+                            <fileTypeSuffix>txt</fileTypeSuffix>
+                            <contexts>
+                                <directory>classpath:/contexts-cp/</directory>
+                                <includes>example-2.yaml</includes>
+                            </contexts>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>templating-test-3-additional-templates</id>
+                        <goals>
+                            <goal>transform</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${generated-text-path}/test3</outputDirectory>
+                            <mainTemplate>test3/test-3.mustache</mainTemplate>
+                            <fileTypeSuffix>txt</fileTypeSuffix>
+                            <contexts>
+                                <includes>exampleA-1.yaml</includes>
+                            </contexts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

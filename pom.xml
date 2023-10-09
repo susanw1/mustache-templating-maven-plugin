@@ -15,8 +15,7 @@
 
     <modules>
         <module>misc</module>
-        <module>templating</module>
+        <module>mustache-templating</module>
         <module>java-testing-deps</module>
     </modules>
-
 </project>

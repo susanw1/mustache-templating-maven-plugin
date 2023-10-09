@@ -38,12 +38,6 @@
             <artifactId>junit-jupiter</artifactId>
             <version>${version.junit}</version>
         </dependency>
-        <!--        Removing this seems to stop the cucumber tests from running. Investigate! -->
-        <!--        <dependency>-->
-        <!--            <groupId>org.junit.vintage</groupId>-->
-        <!--            <artifactId>junit-vintage-engine</artifactId>-->
-        <!--            <version>${version.junit}</version>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
@@ -63,16 +57,6 @@
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <version>${version.awaitility}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.cucumber</groupId>
-            <artifactId>cucumber-java</artifactId>
-            <version>${version.cucumber}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.cucumber</groupId>
-            <artifactId>cucumber-junit</artifactId>
-            <version>${version.cucumber}</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
