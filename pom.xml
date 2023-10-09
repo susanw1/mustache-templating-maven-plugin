@@ -79,6 +79,8 @@
         <version.assertj>3.24.2</version.assertj>
         <version.jimfs>1.3.0</version.jimfs>
         <version.apachecommons>2.13.0</version.apachecommons>
+
+        <version.jacoco-maven-plugin>0.8.10</version.jacoco-maven-plugin>
     </properties>
 
     <modules>
@@ -119,6 +121,25 @@
                     <configuration>
                         <skip>true</skip>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${version.jacoco-maven-plugin}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
