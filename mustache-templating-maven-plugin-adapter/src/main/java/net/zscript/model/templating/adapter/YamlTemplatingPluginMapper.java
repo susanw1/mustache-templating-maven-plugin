@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.singletonList;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -31,7 +32,7 @@ public class YamlTemplatingPluginMapper implements TemplatingPluginMapper {
 
         try (Reader r = new BufferedReader(new InputStreamReader(entity.getFullPathAsUrl().openStream(), UTF_8))) {
             final Map<?, ?> value = yamlMapper.load(r);
-            return List.of(entity.withContents(List.of(value), relativePathToOutput));
+            return singletonList(entity.withContents(singletonList(value), relativePathToOutput));
         } catch (NullPointerException ex) {
             throw new UncheckedIOException(new IOException("Failed to read from: " + entity.getFullPath(), ex));
         } catch (IOException ex) {

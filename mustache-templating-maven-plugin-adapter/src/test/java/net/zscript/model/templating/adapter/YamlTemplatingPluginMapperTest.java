@@ -9,6 +9,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.jimfs.Configuration;
@@ -24,7 +26,7 @@ class YamlTemplatingPluginMapperTest {
         final Path rootDirPath = Files.createDirectory(fs.getPath("/foo"));
 
         final URI          rootPathUri = rootDirPath.toUri();
-        final List<String> relPaths    = List.of("baz/a.yaml");
+        final List<String> relPaths    = singletonList("baz/a.yaml");
         final String       suffix      = "java";
 
         final LoadableEntities           le     = new LoadableEntities("desc", rootPathUri, relPaths, suffix, fs);
@@ -42,7 +44,7 @@ class YamlTemplatingPluginMapperTest {
         final List<Object> content = loadedEntities.get(0).getContents();
         final Map<?, ?>    context = (Map<?, ?>) content.get(0);
         assertThat(context.get("a")).isEqualTo("w1");
-        assertThat(context.get("b")).isInstanceOf(List.class).isEqualTo(List.of("x", "y"));
+        assertThat(context.get("b")).isInstanceOf(List.class).isEqualTo(asList("x", "y"));
         assertThat(context.get("c")).isEqualTo("w3");
 
         assertThat(loadedEntities.get(0).getRelativeOutputPath()).isEqualTo(fs.getPath("baz/a.java"));

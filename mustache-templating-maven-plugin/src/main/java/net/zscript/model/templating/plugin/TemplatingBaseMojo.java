@@ -96,7 +96,7 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
      */
 
     public String executeBase(String contextDefaultDir, String outputDefaultDir) throws MojoExecutionException {
-        final MustacheFactory mustacheFactory = createMustacheFactory();
+        final MustacheFactory mustacheFactory = new DefaultMustacheFactory(createMustacheResolver());
 
         final FileSet          contextFileSet  = initFileSet(contexts, contextDefaultDir);
         final LoadableEntities contextEntities = extractContextFileList(contextFileSet);
@@ -120,7 +120,7 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
                 createDirIfRequired(outputParentDir);
                 final Mustache mustache = mustacheFactory.compile(mainTemplate);
                 getLog().info("Applying context " + context.getRelativePath() + " with template " + mainTemplate + " to " + outputFileFullPath);
-                try (final Writer out = Files.newBufferedWriter(outputFileFullPath)) {
+                try (Writer out = Files.newBufferedWriter(outputFileFullPath)) {
                     mustache.execute(out, context.getContents());
                 }
             } catch (final IOException e) {
@@ -135,15 +135,14 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
         return null;
     }
 
-    private MustacheFactory createMustacheFactory() {
+    private MustacheResolver createMustacheResolver() {
         final String messagePrefix = "Main Template resolution for \"" + mainTemplate + "\": ";
 
         MustacheResolver mustacheResolver = null;
         try {
-            URI dirUri;
             if (templateDirectory == null || templateDirectory.isEmpty()
                     || new File(templateDirectory).isAbsolute()
-                    || (dirUri = new URI(templateDirectory)).getScheme() == null) {
+                    || new URI(templateDirectory).getScheme() == null) {
                 if (templateDirectory != null && !templateDirectory.isEmpty()) {
                     mustacheResolver = createFileResolver(FS.getPath(templateDirectory));
                 }
@@ -159,20 +158,22 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
                 if (mustacheResolver == null) {
                     throw new TemplatingMojoFailureException("Cannot locate template: " + mainTemplate);
                 }
-            } else if (dirUri.getScheme().equals("classpath")) {
+                return mustacheResolver;
+            }
+
+            final URI dirUri = new URI(templateDirectory);
+            if (dirUri.getScheme().equals("classpath")) {
                 final String path         = dirUri.getPath();
                 final String resourceRoot = path.startsWith("/") ? path.substring(1) : path;
-                mustacheResolver = new ClasspathResolver(resourceRoot);
                 getLog().info(messagePrefix + ": use ClasspathResolver with resourceRoot: " + resourceRoot);
+                return new ClasspathResolver(resourceRoot);
             } else {
-                mustacheResolver = new DefaultResolver(dirUri.getPath());
                 getLog().info(messagePrefix + ": use DefaultResolver with resourceRoot: " + dirUri.getPath());
+                return new DefaultResolver(dirUri.getPath());
             }
         } catch (URISyntaxException e1) {
             throw new TemplatingMojoFailureException("Bad URI: " + mainTemplate, e1);
         }
-
-        return new DefaultMustacheFactory(mustacheResolver);
     }
 
     private MustacheResolver createFileResolver(Path templateRootCandidate) {
@@ -269,11 +270,11 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
     }
 
     static class TemplatingMojoFailureException extends RuntimeException {
-        public TemplatingMojoFailureException(String msg, Exception e) {
+        TemplatingMojoFailureException(String msg, Exception e) {
             super(msg, e);
         }
 
-        public TemplatingMojoFailureException(String msg) {
+        TemplatingMojoFailureException(String msg) {
             super(msg);
         }
     }
