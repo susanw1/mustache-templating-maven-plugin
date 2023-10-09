@@ -15,5 +15,5 @@ public interface TemplatingPluginMapper {
      * @param entities the entities to map
      * @return a list of mapped contexts to be transformed
      */
-    List<LoadedEntityContent> loadAndMap(final LoadableEntities entities);
+    List<LoadedEntityContent> loadAndMap(LoadableEntities entities);
 }

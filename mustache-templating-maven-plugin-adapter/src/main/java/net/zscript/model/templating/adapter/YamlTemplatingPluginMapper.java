@@ -29,7 +29,7 @@ public class YamlTemplatingPluginMapper implements TemplatingPluginMapper {
                 + "." + entity.getFileTypeSuffix();
         final Path relativePathToOutput = entity.getFileSystem().getPath(newUriPath);
 
-        try (final Reader r = new BufferedReader(new InputStreamReader(entity.getFullPathAsUrl().openStream(), UTF_8))) {
+        try (Reader r = new BufferedReader(new InputStreamReader(entity.getFullPathAsUrl().openStream(), UTF_8))) {
             final Map<?, ?> value = yamlMapper.load(r);
             return List.of(entity.withContents(List.of(value), relativePathToOutput));
         } catch (NullPointerException ex) {
