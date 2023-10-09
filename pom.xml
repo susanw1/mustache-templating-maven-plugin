@@ -85,7 +85,7 @@
 
     <modules>
         <module>mustache-templating-maven-plugin</module>
-        <module>mustache-templating-maven-plugin-adapter</module>
+        <module>mustache-templating-context-loader</module>
         <module>mustache-templating-tests</module>
         <module>mustache-templating-test-resources</module>
     </modules>

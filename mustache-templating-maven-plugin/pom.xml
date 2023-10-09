@@ -22,7 +22,7 @@
     <dependencies>
         <dependency>
             <groupId>net.zscript.maven-templates</groupId>
-            <artifactId>mustache-templating-maven-plugin-adapter</artifactId>
+            <artifactId>mustache-templating-context-loader</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
