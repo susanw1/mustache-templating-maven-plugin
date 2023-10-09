@@ -1,3 +1,8 @@
+/*
+ * Mustache Templating Maven Plugin - generates files and source-code using Mustache templates.
+ * Copyright (c) 2023 Zscript team (Susan Witts, Alicia Witts)
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package net.zscript.maven.templating.contextloader;
 
 import java.net.MalformedURLException;

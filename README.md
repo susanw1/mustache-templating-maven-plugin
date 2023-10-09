@@ -54,5 +54,3 @@ More examples may be found in the `pom.xml` in the _mustache-templating-tests_ p
 The plugin is self-documenting. Try:
 
     mvn help:describe -Dplugin=net.zscript.maven-templates:mustache-templating-maven-plugin:0.1.0 -Ddetail
-
-#  
