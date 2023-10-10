@@ -1,6 +1,7 @@
 # mustache-templating-maven-plugin
 
 [![Mustache Templating Maven Plugin Build](https://github.com/susanw1/mustache-templating-maven-plugin/actions/workflows/maven.yaml/badge.svg)](https://github.com/susanw1/mustache-templating-maven-plugin/actions/workflows/maven.yaml)
+[![codecov](https://codecov.io/gh/susanw1/mustache-templating-maven-plugin/graph/badge.svg?token=U1CDGHGJFY)](https://codecov.io/gh/susanw1/mustache-templating-maven-plugin)
 
 This is a Maven Plugin for running templated file generation during a Maven build. You specify a template in the configuration, and a set of YAML contexts to be used to populate
 the template, and an output file is generated per context.
