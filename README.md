@@ -12,7 +12,7 @@ It has the following features:
 * The context loader is pluggable, so if your contexts are more complex or require some processing, then you can add a custom ContextLoader to produce one or more custom objects to
   be templated. This also gives control over the output filename.
 
-This plugin is an offshoot of the [Zscript](../zscript) project, where it is used to generate custom Java code from YAML message definitions.
+This plugin is an offshoot of the [Zscript](https://github.com/susanw1/zscript) project, where it is used to generate custom Java code from YAML message definitions.
 
 # Usage
 
@@ -50,7 +50,8 @@ Key points:
 
 # More information
 
-More examples may be found in the `pom.xml` in the [_mustache-templating-tests_](/susanw1/mustache-templating-maven-plugin/tree/main/mustache-templating-tests) project.
+More examples may be found in the `pom.xml` in the [_mustache-templating-tests_](https://github.com/susanw1/mustache-templating-maven-plugin/tree/main/mustache-templating-tests)
+project.
 
 The plugin is self-documenting. Try:
 
