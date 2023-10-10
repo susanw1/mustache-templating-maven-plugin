@@ -84,7 +84,7 @@
         <version.maven-javadoc-plugin>3.6.0</version.maven-javadoc-plugin>
         <version.maven-source-plugin>2.2.1</version.maven-source-plugin>
         <version.maven-gpg-plugin>1.5</version.maven-gpg-plugin>
-        <version.maven-release-plugin>2.5.3</version.maven-release-plugin>
+        <version.maven-release-plugin>3.0.1</version.maven-release-plugin>
         <version.maven-nexus-staging-plugin>1.6.13</version.maven-nexus-staging-plugin>
     </properties>
 
@@ -223,10 +223,8 @@
                     <configuration>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <tagNameFormat>@{project.version}</tagNameFormat>
-                        <pushChanges>false</pushChanges>
-                        <localCheckout>true</localCheckout>
-                        <remoteTagging>false</remoteTagging>
-                        <arguments>-DskipTests=true</arguments>
+                        <releaseProfiles>release</releaseProfiles>
+                        <goals>deploy</goals>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -235,8 +233,8 @@
                     <version>${version.maven-nexus-staging-plugin}</version>
                     <extensions>true</extensions>
                     <configuration>
-                        <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
                         <serverId>ossrh</serverId>
+                        <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
                         <autoReleaseAfterClose>true</autoReleaseAfterClose>
                         <stagingProgressTimeoutMinutes>60</stagingProgressTimeoutMinutes>
                     </configuration>
