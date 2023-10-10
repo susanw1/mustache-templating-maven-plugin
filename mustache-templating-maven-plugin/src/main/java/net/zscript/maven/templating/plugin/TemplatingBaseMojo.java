@@ -58,9 +58,9 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
 
     /**
      * A fileset describing a set of context files (ie JSON/YAML files for the default transformer). Defaults to src/main/contexts (or 'src/test/contexts' if 'test-transform'goal
-     * is used). If the &lt;directory> element is specified but does not correspond to an existing directory, then it will be tried as a URL, also allowing the "classpath:" scheme
-     * to read from classpath resources. Note, if a URL directory is specified in the fileset, then only specific &lt;include> tags with relative paths are supported with URLs - no
-     * wildcards, no excludes etc.
+     * is used). If the &lt;directory&gt; element is specified but does not correspond to an existing directory, then it will be tried as a URL, also allowing the "classpath:"
+     * scheme to read from classpath resources. Note, if a URL directory is specified in the fileset, then only specific &lt;include&gt; tags with relative paths are supported with
+     * URLs - no wildcards, no excludes etc.
      */
     @Parameter
     protected FileSet contexts;

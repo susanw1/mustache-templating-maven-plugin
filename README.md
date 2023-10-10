@@ -8,11 +8,11 @@ the template, and an output file is generated per context.
 
 It has the following features:
 
-* Templates and contexts are loadable from directories under _src_, from a _classpath:/_ URL, or from any other URL.
+* Templates and contexts are loadable from directories under _src_, from a _classpath:/_ URL, or from any other reachable URL.
 * The context loader is pluggable, so if your contexts are more complex or require some processing, then you can add a custom ContextLoader to produce one or more custom objects to
   be templated. This also gives control over the output filename.
 
-This plugin is an offshoot of the Zscript project, where it is used to generate custom Java code from YAML message definitions.
+This plugin is an offshoot of the [Zscript](../zscript) project, where it is used to generate custom Java code from YAML message definitions.
 
 # Usage
 
@@ -50,8 +50,14 @@ Key points:
 
 # More information
 
-More examples may be found in the `pom.xml` in the [_mustache-templating-tests_](tree/1-updates-for-release/mustache-templating-tests) project.
+More examples may be found in the `pom.xml` in the [_mustache-templating-tests_](/susanw1/mustache-templating-maven-plugin/tree/main/mustache-templating-tests) project.
 
 The plugin is self-documenting. Try:
 
     mvn help:describe -Dplugin=net.zscript.maven-templates:mustache-templating-maven-plugin:0.1.0 -Ddetail
+
+# Related Links and Support
+
+* Zscript: https://github.com/susanw1/zscript
+* Mailing list: https://groups.google.com/g/zscript
+* Slack: https://app.slack.com/client/T05NY2VRSE5/C05P94WKR16
