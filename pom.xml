@@ -55,8 +55,8 @@
 
     <scm>
         <url>https://github.com/susanw1/mustache-templating-maven-plugin</url>
-        <connection>scm:git:git@github.com:susanw1/mustache-templating-maven-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:susanw1/mustache-templating-maven-plugin.git</developerConnection>
+        <connection>scm:git:https://github.com/susanw1/mustache-templating-maven-plugin.git</connection>
+        <developerConnection>scm:git:https://github.com/susanw1/mustache-templating-maven-plugin.git</developerConnection>
     </scm>
     <issueManagement>
         <system>GitHub Issues</system>
