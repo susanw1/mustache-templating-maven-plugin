@@ -38,13 +38,14 @@
     <developers>
         <developer>
             <name>Susan Witts</name>
-            <id>SusanW</id>
+            <id>susanw1</id>
             <url>https://www.linkedin.com/in/susan-witts/</url>
             <timezone>Europe/London</timezone>
             <email>susanwitts1@gmail.com</email>
             <organization>Zscript Team</organization>
         </developer>
         <developer>
+            <id>More-Wrong</id>
             <name>More-Wrong</name>
             <url>https://github.com/More-Wrong/</url>
             <timezone>Europe/London</timezone>
@@ -54,7 +55,7 @@
 
     <scm>
         <url>https://github.com/susanw1/mustache-templating-maven-plugin</url>
-        <connection>scm:git:git://github.com/susanw1/mustache-templating-maven-plugin.git</connection>
+        <connection>scm:git:git@github.com:susanw1/mustache-templating-maven-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:susanw1/mustache-templating-maven-plugin.git</developerConnection>
     </scm>
     <issueManagement>
@@ -83,6 +84,8 @@
         <version.maven-javadoc-plugin>3.6.0</version.maven-javadoc-plugin>
         <version.maven-source-plugin>2.2.1</version.maven-source-plugin>
         <version.maven-gpg-plugin>1.5</version.maven-gpg-plugin>
+        <version.maven-release-plugin>2.5.3</version.maven-release-plugin>
+        <version.maven-nexus-staging-plugin>1.6.13</version.maven-nexus-staging-plugin>
     </properties>
 
     <modules>
@@ -212,6 +215,31 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>${version.maven-release-plugin}</version>
+                    <configuration>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <tagNameFormat>@{project.version}</tagNameFormat>
+                        <pushChanges>false</pushChanges>
+                        <localCheckout>true</localCheckout>
+                        <remoteTagging>false</remoteTagging>
+                        <arguments>-DskipTests=true</arguments>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>${version.maven-nexus-staging-plugin}</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                        <serverId>ossrh</serverId>
+                        <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        <stagingProgressTimeoutMinutes>60</stagingProgressTimeoutMinutes>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
