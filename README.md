@@ -50,7 +50,7 @@ Key points:
 
 # More information
 
-More examples may be found in the `pom.xml` in the [_mustache-templating-tests_](tree/1-updates-for-release/mustache-templating-tests) project.
+More examples may be found in the `pom.xml` in the [_mustache-templating-tests_](tree/main/mustache-templating-tests) project.
 
 The plugin is self-documenting. Try:
 

@@ -27,7 +27,6 @@ public class TemplatingMojo extends TemplatingBaseMojo {
     public void execute() throws MojoExecutionException {
         templateRootDirs.add(TEMPLATE_DEFAULT_DIR);
         String outputDirectoryPath = executeBase(CONTEXT_DEFAULT_DIR, OUTPUT_DEFAULT_DIR);
-        getLog().info("Main: generateSources: " + generateSources + ", fileTypeSuffix: " + fileTypeSuffix + ", outputDirectoryPath: " + outputDirectoryPath);
         if (outputDirectoryPath != null) {
             project.addCompileSourceRoot(outputDirectoryPath);
         }
