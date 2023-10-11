@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -16,7 +17,7 @@
     <description>
         A Maven Plugin for generating files and source-code using Mustache templates, with a pluggable
         adapter system for constructing the contexts to populate those templates.
-        Developed for model-&gt;code generation in Zscript: https://github.com/susanw1/zscript
+        Developed for model-to-code generation in Zscript: https://github.com/susanw1/zscript
     </description>
     <url>https://github.com/susanw1/mustache-templating-maven-plugin</url>
     <inceptionYear>2023</inceptionYear>
@@ -50,13 +51,22 @@
             <organization>Zscript Team</organization>
         </developer>
     </developers>
+    <mailingLists>
+        <mailingList>
+            <name>Mustache Templating plugin</name>
+            <subscribe>https://groups.google.com/g/zscript</subscribe>
+            <unsubscribe>zscript+unsubscribe@googlegroups.com</unsubscribe>
+            <post>zscript@googlegroups.com</post>
+            <archive>https://groups.google.com/g/zscript</archive>
+        </mailingList>
+    </mailingLists>
 
     <scm>
         <url>https://github.com/susanw1/mustache-templating-maven-plugin</url>
         <connection>scm:git:https://github.com/susanw1/mustache-templating-maven-plugin.git</connection>
         <developerConnection>scm:git:https://github.com/susanw1/mustache-templating-maven-plugin.git</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
     <issueManagement>
         <system>GitHub Issues</system>
         <url>https://github.com/susanw1/mustache-templating-maven-plugin/issues/</url>
@@ -177,7 +187,7 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>${version.maven-javadoc-plugin}</version>
                     <configuration>
-                        <detectLinks />
+                        <detectLinks/>
                     </configuration>
                     <executions>
                         <execution>
