@@ -34,7 +34,7 @@ class YamlTemplatingPluginContextLoaderTest {
         final List<String> relPaths    = singletonList("baz/a.yaml");
         final String       suffix      = "java";
 
-        final LoadableEntities                  le            = new LoadableEntities("desc", rootPathUri, relPaths, suffix, fs);
+        final LoadableEntities                  le            = new LoadableEntities(rootPathUri, relPaths, suffix, fs);
         final YamlTemplatingPluginContextLoader contextLoader = new YamlTemplatingPluginContextLoader();
 
         final Path yamlFile = fs.getPath("/foo", "baz", "a.yaml");

@@ -19,6 +19,9 @@ import static java.util.Collections.singletonList;
 
 import org.yaml.snakeyaml.Yaml;
 
+/**
+ * This is the default ContextLoader implementation, which loads context content from some specified Json/YAML files, and presents their content for templating.
+ */
 public class YamlTemplatingPluginContextLoader implements TemplatingPluginContextLoader {
     private final Yaml yamlMapper = new Yaml();
 

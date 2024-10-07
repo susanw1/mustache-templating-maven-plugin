@@ -10,7 +10,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
- * The entry class for the maven plugin
+ * The entry class for the maven plugin for normal main sources.
  */
 @Mojo(name = "transform", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class TemplatingMojo extends TemplatingBaseMojo {

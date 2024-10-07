@@ -67,7 +67,7 @@
     </issueManagement>
 
     <prerequisites>
-        <maven>3.6.3</maven>
+        <maven>${version.maven}</maven>
     </prerequisites>
 
     <properties>
@@ -83,11 +83,13 @@
         <version.jimfs>1.3.0</version.jimfs>
         <version.apachecommons>2.17.0</version.apachecommons>
 
+        <version.maven>3.6.3</version.maven>
         <version.jacoco-maven-plugin>0.8.12</version.jacoco-maven-plugin>
         <version.maven-javadoc-plugin>3.10.1</version.maven-javadoc-plugin>
         <version.maven-source-plugin>3.3.1</version.maven-source-plugin>
         <version.maven-compiler-plugin>3.13.0</version.maven-compiler-plugin>
         <version.maven-surefire-plugin>3.5.1</version.maven-surefire-plugin>
+        <version.maven-enforcer-plugin>3.5.0</version.maven-enforcer-plugin>
         <version.maven-gpg-plugin>1.5</version.maven-gpg-plugin>
         <version.maven-release-plugin>3.1.1</version.maven-release-plugin>
         <version.maven-nexus-staging-plugin>1.7.0</version.maven-nexus-staging-plugin>
@@ -198,6 +200,7 @@
                     <version>${version.maven-javadoc-plugin}</version>
                     <configuration>
                         <detectLinks/>
+                        <source>${java.source.version}</source>
                     </configuration>
                     <executions>
                         <execution>
@@ -218,6 +221,26 @@
                             <goals>
                                 <goal>jar-no-fork</goal>
                             </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>${version.maven-enforcer-plugin}</version>
+                    <executions>
+                        <execution>
+                            <id>enforce-maven</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <requireMavenVersion>
+                                        <version>${version.maven}</version>
+                                    </requireMavenVersion>
+                                </rules>
+                            </configuration>
                         </execution>
                     </executions>
                 </plugin>
@@ -265,6 +288,10 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
