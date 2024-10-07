@@ -57,9 +57,9 @@ Key points:
 * the template file used is found under _src/main/templates_ by default - and if you use Mustache 'partials' (inclusions), then `{{> mypartial.mustache}}` is expected to be
   relative to that same directory.
 
-## Tranformations
+## Context Loading and Mapping
 
-By default, the plugin assumes each of your contexts is a single JSON/YAML file. If you use a different format, or if your contexts need processing before the template is
+By default, the plugin assumes each of your contexts is a single JSON/YAML file. If you use some other format, or if your contexts need processing before the template is
 applied, then you can create a _context loader_. This is a Java class which is given the context files' paths from the POM, and returns the Objects which are presented to the
 template.
 
@@ -69,9 +69,10 @@ This allows:
 * resolution of filename/URL inclusion (eg #include)
 * multiple new "sub" contexts produced from a single master file
 
-To make transformation work, you need to:
+To make context loading/mapping work, you need to:
 
-* Create a _new, separate Maven module_ to put this transformer class in, and add *mustache-templating-context-loader* as a dependency. You have to do this, because this module
+* Create a _new, separate Maven module_ to put this context-loader class in, and add *net.zscript.maven-templates:mustache-templating-context-loader* as a dependency. You have to
+  do this, because this module
   will be part of your build, not part of your application, and needs to be built and packaged in advance of using it. It can't be in the same module that uses it.
 * In this new module, create a subclass
   of [`net.zscript.maven.templating.contextloader.TemplatingPluginContextLoader`](https://github.com/susanw1/mustache-templating-maven-plugin/tree/main/mustache-templating-context-loader/src/main/java/net/zscript/maven/templating/contextloader),
