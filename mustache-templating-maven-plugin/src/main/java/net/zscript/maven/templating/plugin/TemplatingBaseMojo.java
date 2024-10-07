@@ -38,6 +38,9 @@ import net.zscript.maven.templating.contextloader.LoadableEntities;
 import net.zscript.maven.templating.contextloader.LoadableEntities.LoadedEntityContent;
 import net.zscript.maven.templating.contextloader.TemplatingPluginContextLoader;
 
+/**
+ * Common superclass for the "Main" and "Test" mojos.
+ */
 abstract class TemplatingBaseMojo extends AbstractMojo {
     private static final String     FILE_TYPE_SUFFIX_DEFAULT = "java";
     private static final FileSystem FS                       = FileSystems.getDefault();
@@ -57,43 +60,46 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
     protected String mainTemplate;
 
     /**
-     * A fileset describing a set of context files (ie JSON/YAML files for the default transformer). Defaults to src/main/contexts (or 'src/test/contexts' if 'test-transform'goal
-     * is used). If the &lt;directory&gt; element is specified but does not correspond to an existing directory, then it will be tried as a URL, also allowing the "classpath:"
-     * scheme to read from classpath resources. Note, if a URL directory is specified in the fileset, then only specific &lt;include&gt; tags with relative paths are supported with
-     * URLs - no wildcards, no excludes etc.
+     * A fileset describing a set of context files (ie JSON/YAML files for the default transformer). Defaults to 'src/main/contexts' (or 'src/test/contexts' if 'test-transform'
+     * goal is used). If the &lt;directory&gt; element is specified but does not correspond to an existing directory, then it will be attempted as a URL, also supporting the
+     * "classpath:" scheme to read from classpath resources. Note, if a URL directory is specified in the fileset, then only specific &lt;include&gt; tags with relative paths are
+     * supported with URLs - no wildcards, no excludes etc.
      */
     @Parameter
     protected FileSet contexts;
 
     /**
-     * Specify output directory where the transformed output files are placed. This directory is added to the Maven Compile Source Root list if the {@code fileTypeSuffix} is
+     * Specify output directory where the transformed output files are placed. This directory is also added to the Maven Compile Source Root list if the {@code fileTypeSuffix} is
      * "java", or if the 'generateSources' parameter is set.
      */
     @Parameter
     protected File outputDirectory;
 
     /**
-     * The fully-qualified classmame of a TemplatingPluginContextLoader to use for loading and mapping the files described by the {@code contexts}. Changing this allows you to
-     * perform arbitrary transformations from any file-type you can read.
+     * The fully-qualified classname of a {@link TemplatingPluginContextLoader} to use for loading and mapping the files described by the {@code contexts}. Changing this allows you
+     * to perform arbitrary transformations from any file-type you can read.
+     * <p>
+     * The class you specify here must be built in a separate Maven module from the one you want to use it, which must be added as a dependency of the plugin execution definition.
+     * See the separate test project _mustache-templating-tests_ for an example.
      */
     @Parameter(defaultValue = "net.zscript.maven.templating.contextloader.YamlTemplatingPluginContextLoader")
     protected String contextLoaderClass;
 
     /**
-     * If true, then an empty template/context fileset is considered an error.
+     * If true, then an empty context fileset is considered an error.
      */
     @Parameter(defaultValue = "true")
     protected boolean failIfNoFiles;
 
     /**
-     * The file suffix to add to output files. If "java", then the output directory is added to the compile/test scope.
+     * The file suffix to add to output files. If "java" (the default), then the output directory is added to the compile/test scope.
      */
     @Parameter(defaultValue = FILE_TYPE_SUFFIX_DEFAULT)
     protected String fileTypeSuffix;
 
     /**
-     * If 'true', then the output directory is added to the {@code compile} scope; 'false' otherwise. This allows generated Java sources to be properly compiled into the project.
-     * If unset, sources will be generated if fileTypeSuffix is ".java".
+     * If 'true', then the output directory is added to the {@code compile} scope, which allows generated sources to be properly compiled into the project. If false, then the
+     * {@code compile} scope is unchanged. If unset (default), sources will only be added if fileTypeSuffix is ".java".
      */
     @Parameter
     protected String generateSources;
@@ -103,16 +109,17 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
 
     protected final List<String> templateRootDirs = new ArrayList<>();
 
-    /*
-     * templateDirectory:
-     *  empty? Assume FS, and find templateRootDirs[i]/mainTemplate. Then use FileSystemResolver=templateRootDirs[i], mainTemplate
-     *  classpath: ? ClasspathResolver=templateDirectory, mainTemplate
-     *  scheme = null? Assume FS, and find templateRootDirs[i]/templateDirectory/mainTemplate, use templateRootDirs[i]/templateDirectory, mainTemplate
-     *  scheme=other? templateDirectory, mainTemplate
+    /**
+     * Performs the actual execution for either of the subclass Mojos.
+     *
+     * @param contextDefaultDir the base directory for loading context files (differs for main vs test)
+     * @param outputDefaultDir  the base directory for putting generated files (differs for main vs test)
+     * @return a path to be added as a CompileSourceRoot directory (for compilation), or null if not required
+     * @throws MojoExecutionException if anything fails
      */
-
     public String executeBase(String contextDefaultDir, String outputDefaultDir) throws MojoExecutionException {
-        final MustacheFactory mustacheFactory = new DefaultMustacheFactory(createMustacheResolver());
+        final MustacheResolver mustacheResolver = createMustacheResolver();
+        final MustacheFactory  mustacheFactory  = new DefaultMustacheFactory(mustacheResolver);
 
         final FileSet          contextFileSet  = initFileSet(contexts, contextDefaultDir);
         final LoadableEntities contextEntities = extractContextFileList(contextFileSet);
@@ -129,6 +136,7 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
         final Path outputDirectoryPath = outputDirectory.toPath();
         createDirIfRequired(outputDirectoryPath);
 
+        // This is the important bit: iterates the contexts and performs the actual Mustache templating.
         for (LoadedEntityContent context : loadedMappedContexts) {
             try {
                 final Path outputFileFullPath = outputDirectoryPath.resolve(context.getRelativeOutputPath());
@@ -151,6 +159,15 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
         return null;
     }
 
+    /**
+     * This does the legwork with respect to handling the 'templateDirectory', 'mainTemplate', and the main (and possibly test) 'templateRootDirs'.  The templateRootDirs are only
+     * tried if  templateDirectory appears to be a relative path.
+     * <p>
+     * If treating them as files doesn't work, it tries them as a URL. If there's a scheme called "classpath", then the URL path is tried as a Classpath, reading from the
+     * default/configured resources root.
+     *
+     * @return a valid template resolver, never null
+     */
     private MustacheResolver createMustacheResolver() {
         final String messagePrefix = "Main Template resolution for \"" + mainTemplate + "\": ";
 
@@ -224,12 +241,18 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
         }
     }
 
+    /**
+     * Ensures we have a FileSet with a 'directory' configured, using the supplied default if not already set.
+     *
+     * @param fs         a fileset to update, or null (in which case a new empty FileSet is created)
+     * @param defaultDir the directory to use, if FileSet doesn't already have one; this is resolved relative to the project's basedir
+     * @return a FileSet with a configured directory
+     */
     private FileSet initFileSet(final FileSet fs, final String defaultDir) {
         final FileSet fileSet = fs != null ? fs : new FileSet();
 
-        final Path dirToSet;
         if (fileSet.getDirectory() == null) {
-            dirToSet = project.getBasedir().toPath().resolve(defaultDir);
+            final Path dirToSet = project.getBasedir().toPath().resolve(defaultDir);
             fileSet.setDirectory(dirToSet.toString());
         }
         return fileSet;
@@ -240,8 +263,8 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
         try {
             URI rootUri = new URI(directoryString);
             if (rootUri.getScheme() != null) {
-                getLog().debug("Context: directory is valid URI, so assuming using limited includes paths: " + directoryString);
-                return new LoadableEntities("Context", rootUri, fileSet.getIncludes(), fileTypeSuffix, FS);
+                getLog().debug("Context: directory is valid URI, so assuming using limited 'includes' paths: " + directoryString);
+                return new LoadableEntities(rootUri, fileSet.getIncludes(), fileTypeSuffix, FS);
             }
         } catch (URISyntaxException e) {
             getLog().debug("Context: directory isn't valid URI, so assuming local directory: " + directoryString);
@@ -272,7 +295,7 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
         getLog().debug("    #files = " + files.size());
         files.forEach(f -> getLog().debug("    " + f));
 
-        return new LoadableEntities("Context", rootUri, files, fileTypeSuffix, rootPath.getFileSystem());
+        return new LoadableEntities(rootUri, files, fileTypeSuffix, rootPath.getFileSystem());
     }
 
     private List<LoadedEntityContent> loadMappedContexts(LoadableEntities contextEntities) throws MojoExecutionException {

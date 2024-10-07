@@ -30,7 +30,7 @@ class LoadableEntitiesTest {
         final List<String> relPaths = Arrays.asList("bar", "baz/");
         final String       suffix   = "java";
 
-        final LoadableEntities le = new LoadableEntities("desc", rootPath, relPaths, suffix, fs);
+        final LoadableEntities le = new LoadableEntities(rootPath, relPaths, suffix, fs);
 
         final List<LoadableEntities.LoadedEntityContent> result = le.loadEntities(
                 entity -> singletonList(entity.withContents(
@@ -42,19 +42,18 @@ class LoadableEntitiesTest {
                 .hasSize(2)
                 .extracting(LoadableEntities.LoadedEntityContent::getContents,
                         LoadableEntities.LoadedEntityContent::getRelativeOutputPath,
-                        LoadableEntities.LoadedEntityContent::getDescription,
                         LoadableEntities.LoadedEntityContent::getRelativePath,
                         LoadableEntities.LoadedEntityContent::getRootPath,
                         LoadableEntities.LoadedEntityContent::getFullPath)
                 .containsExactly(
-                        tuple(singletonList("content+bar"), fs.getPath("a/bar"), "desc", "bar", new URI("file:///foo/"), new URI("file:///foo/bar")),
-                        tuple(singletonList("content+baz/"), fs.getPath("a/baz/"), "desc", "baz/", new URI("file:///foo/"), new URI("file:///foo/baz/")));
+                        tuple(singletonList("content+bar"), fs.getPath("a/bar"), "bar", new URI("file:///foo/"), new URI("file:///foo/bar")),
+                        tuple(singletonList("content+baz/"), fs.getPath("a/baz/"), "baz/", new URI("file:///foo/"), new URI("file:///foo/baz/")));
     }
 
     @Test
     void shouldRejectAbsoluteEntityPath() {
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> new LoadableEntities("desc", new URI("/foo/"), singletonList("/bar"), "java", fs)
+                .isThrownBy(() -> new LoadableEntities(new URI("/foo/"), singletonList("/bar"), "java", fs)
                         .loadEntities(e -> emptyList()))
                 .withMessageStartingWith("relativePath is absolute");
     }
@@ -62,7 +61,7 @@ class LoadableEntitiesTest {
     @Test
     void shouldRejectAbsoluteOutputPath() {
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> new LoadableEntities("desc", new URI("/foo/"), singletonList("bar"), "java", fs)
+                .isThrownBy(() -> new LoadableEntities(new URI("/foo/"), singletonList("bar"), "java", fs)
                         .loadEntities(e -> singletonList(e.withContents(singletonList(""), fs.getPath("/baz")))))
                 .withMessageStartingWith("relativeOutputPath is absolute");
     }

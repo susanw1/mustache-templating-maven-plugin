@@ -10,7 +10,12 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
- * The entry class for the test maven plugin
+ * The entry class for the <i>test</i> maven plugin. It differs from the {@link TemplatingMojo} templates:
+ * <ul>
+ *     <li>it pre-checks whether a specified template is in {@code src/test/templates} before checking the normal one</li>
+ *     <li>contexts are searched in {@code src/test/contexts} by default</li>
+ *     <li>if transformed output is to be considered source-code, then the output directory is added to the project's TestCompileSourceRoot list, not the normal one</li>
+ * </ul>
  */
 @Mojo(name = "test-transform", defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES)
 public class TemplatingTestMojo extends TemplatingBaseMojo {
