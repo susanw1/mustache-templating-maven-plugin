@@ -2,12 +2,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-plugins</artifactId>
-        <version>42</version>
-    </parent>
-
     <groupId>net.zscript.maven-templates</groupId>
     <artifactId>mustache-templating</artifactId>
     <version>0.0.2-SNAPSHOT</version>
@@ -92,6 +86,7 @@
         <version.jacoco-maven-plugin>0.8.12</version.jacoco-maven-plugin>
         <version.maven-javadoc-plugin>3.10.1</version.maven-javadoc-plugin>
         <version.maven-source-plugin>3.3.1</version.maven-source-plugin>
+        <version.maven-compiler-plugin>3.13.0</version.maven-compiler-plugin>
         <version.maven-gpg-plugin>1.5</version.maven-gpg-plugin>
         <version.maven-release-plugin>3.1.1</version.maven-release-plugin>
         <version.maven-nexus-staging-plugin>1.7.0</version.maven-nexus-staging-plugin>
@@ -149,6 +144,15 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${version.maven-compiler-plugin}</version>
+                    <configuration>
+                        <source>${java.source.version}</source>
+                        <target>${java.target.version}</target>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>com.diffplug.spotless</groupId>
                     <artifactId>spotless-maven-plugin</artifactId>
