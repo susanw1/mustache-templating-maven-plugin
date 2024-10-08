@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -52,6 +53,11 @@
                         <artifactId>mustache-templating-maven-plugin-test-resources</artifactId>
                         <version>${project.version}</version>
                     </dependency>
+                    <dependency>
+                        <groupId>net.zscript.maven-templates</groupId>
+                        <artifactId>mustache-templating-maven-plugin-test-contextloader</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
                 </dependencies>
 
                 <executions>
@@ -98,6 +104,22 @@
                             <fileTypeSuffix>txt</fileTypeSuffix>
                             <contexts>
                                 <includes>exampleA-1.yaml</includes>
+                            </contexts>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>templating-test-5-additional-templates</id>
+                        <goals>
+                            <goal>transform</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${generated-text-path}/test5</outputDirectory>
+                            <mainTemplate>test-5.mustache</mainTemplate>
+                            <contextLoaderClass>net.zscript.maven.templating.contextloader.example.ExampleContextLoader</contextLoaderClass>
+                            <fileTypeSuffix>txt</fileTypeSuffix>
+                            <contexts>
+                                <includes>test-5*.properties</includes>
                             </contexts>
                         </configuration>
                     </execution>

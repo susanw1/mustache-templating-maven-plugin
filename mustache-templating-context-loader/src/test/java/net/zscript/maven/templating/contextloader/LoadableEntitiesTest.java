@@ -32,19 +32,19 @@ class LoadableEntitiesTest {
 
         final LoadableEntities le = new LoadableEntities(rootPath, relPaths, suffix, fs);
 
-        final List<LoadableEntities.LoadedEntityContent> result = le.loadEntities(
-                entity -> singletonList(entity.withContents(
+        final List<LoadableEntities.LoadedEntityScopes> result = le.loadEntities(
+                entity -> singletonList(entity.withScopes(
                         singletonList("content+" + entity.getRelativePath()),
                         fs.getPath("a").resolve(entity.getRelativePath())))
         );
 
         assertThat(result)
                 .hasSize(2)
-                .extracting(LoadableEntities.LoadedEntityContent::getContents,
-                        LoadableEntities.LoadedEntityContent::getRelativeOutputPath,
-                        LoadableEntities.LoadedEntityContent::getRelativePath,
-                        LoadableEntities.LoadedEntityContent::getRootPath,
-                        LoadableEntities.LoadedEntityContent::getFullPath)
+                .extracting(LoadableEntities.LoadedEntityScopes::getScopes,
+                        LoadableEntities.LoadedEntityScopes::getRelativeOutputPath,
+                        LoadableEntities.LoadedEntityScopes::getRelativePath,
+                        LoadableEntities.LoadedEntityScopes::getRootPath,
+                        LoadableEntities.LoadedEntityScopes::getFullPath)
                 .containsExactly(
                         tuple(singletonList("content+bar"), fs.getPath("a/bar"), "bar", new URI("file:///foo/"), new URI("file:///foo/bar")),
                         tuple(singletonList("content+baz/"), fs.getPath("a/baz/"), "baz/", new URI("file:///foo/"), new URI("file:///foo/baz/")));
@@ -62,7 +62,7 @@ class LoadableEntitiesTest {
     void shouldRejectAbsoluteOutputPath() {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> new LoadableEntities(new URI("/foo/"), singletonList("bar"), "java", fs)
-                        .loadEntities(e -> singletonList(e.withContents(singletonList(""), fs.getPath("/baz")))))
+                        .loadEntities(e -> singletonList(e.withScopes(singletonList(""), fs.getPath("/baz")))))
                 .withMessageStartingWith("relativeOutputPath is absolute");
     }
 }

@@ -26,13 +26,14 @@ public class YamlTemplatingPluginContextLoader implements TemplatingPluginContex
     private final Yaml yamlMapper = new Yaml();
 
     @Override
-    public List<LoadableEntities.LoadedEntityContent> loadAndMap(LoadableEntities entities) {
+    public List<LoadableEntities.LoadedEntityScopes> loadAndMap(LoadableEntities entities) {
         return entities.loadEntities(this::load);
     }
 
-    private List<LoadableEntities.LoadedEntityContent> load(LoadableEntities.LoadableEntity entity) {
+    private List<LoadableEntities.LoadedEntityScopes> load(LoadableEntities.LoadableEntity entity) {
         final String relativePathToSource = entity.getRelativePath();
 
+        // Figure out the (relative) output filename
         final int dotIndex = relativePathToSource.lastIndexOf('.');
         final String newUriPath = (dotIndex != -1 ? relativePathToSource.substring(0, dotIndex) : relativePathToSource)
                 + "." + entity.getFileTypeSuffix();
@@ -40,7 +41,7 @@ public class YamlTemplatingPluginContextLoader implements TemplatingPluginContex
 
         try (Reader r = new BufferedReader(new InputStreamReader(entity.getFullPathAsUrl().openStream(), UTF_8))) {
             final Map<?, ?> value = yamlMapper.load(r);
-            return singletonList(entity.withContents(singletonList(value), relativePathToOutput));
+            return singletonList(entity.withScopes(singletonList(value), relativePathToOutput));
         } catch (NullPointerException ex) {
             throw new UncheckedIOException(new IOException("Failed to read from: " + entity.getFullPath(), ex));
         } catch (IOException ex) {

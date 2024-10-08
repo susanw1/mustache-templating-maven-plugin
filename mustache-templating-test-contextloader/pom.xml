@@ -1,0 +1,28 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.zscript.maven-templates</groupId>
+        <artifactId>mustache-templating</artifactId>
+        <version>0.0.2-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>mustache-templating-maven-plugin-test-contextloader</artifactId>
+    <name>Maven Templating Plugin Example ContextLoader</name>
+
+    <description>
+        Testing only. This is an example ContextLoader to facilitate testing, and to serve as an example.
+        Don't make this a dependency of any other projects (except to prove whether things work), and it should only be
+        a dependency of the templating plugin, not of any actual project (it's a build tool, not part of any application).
+        See the pom and tests in mustache-templating-maven-plugin-tests to see how it is used.
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>net.zscript.maven-templates</groupId>
+            <artifactId>mustache-templating-context-loader</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+</project>
