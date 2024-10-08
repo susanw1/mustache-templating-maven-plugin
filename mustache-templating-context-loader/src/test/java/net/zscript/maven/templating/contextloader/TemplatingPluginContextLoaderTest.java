@@ -19,4 +19,12 @@ class TemplatingPluginContextLoaderTest {
         Path result = loader.createDefaultOutputPath("this/that.x", "abc", fs);
         assertThat(result.toString()).isEqualTo("this/that.abc");
     }
+
+    @Test
+    public void shouldConstructDefaultOutputPathWhenNoSuffix() {
+        TemplatingPluginContextLoader loader = entities -> null;
+
+        Path result = loader.createDefaultOutputPath("this/that", "abc", fs);
+        assertThat(result.toString()).isEqualTo("this/that.abc");
+    }
 }
