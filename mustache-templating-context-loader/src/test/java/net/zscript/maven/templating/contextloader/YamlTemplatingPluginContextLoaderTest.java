@@ -43,14 +43,14 @@ class YamlTemplatingPluginContextLoaderTest {
             w.write("{a : w1, b: [x,y], c: w3}");
         }
 
-        final List<LoadableEntities.LoadedEntityContent> loadedEntities = contextLoader.loadAndMap(le);
+        final List<LoadableEntities.LoadedEntityScopes> loadedEntities = contextLoader.loadAndMap(le);
 
         assertThat(loadedEntities).hasSize(1);
-        final List<Object> content = loadedEntities.get(0).getContents();
-        final Map<?, ?>    context = (Map<?, ?>) content.get(0);
-        assertThat(context.get("a")).isEqualTo("w1");
-        assertThat(context.get("b")).isInstanceOf(List.class).isEqualTo(asList("x", "y"));
-        assertThat(context.get("c")).isEqualTo("w3");
+        final List<Object> contexts = loadedEntities.get(0).getScopes();
+        final Map<?, ?>    context0 = (Map<?, ?>) contexts.get(0);
+        assertThat(context0.get("a")).isEqualTo("w1");
+        assertThat(context0.get("b")).isInstanceOf(List.class).isEqualTo(asList("x", "y"));
+        assertThat(context0.get("c")).isEqualTo("w3");
 
         assertThat(loadedEntities.get(0).getRelativeOutputPath()).isEqualTo(fs.getPath("baz/a.java"));
     }

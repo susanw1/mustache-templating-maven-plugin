@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
  * These tests verify that actions performed by the Maven Plugin have succeeded. Make sure you've built the module (and its dependencies) first!
  */
 public class Test3LocalFileTemplatingPartialTest {
-
     @Test
     public void shouldCreateFileUsingPartials() throws IOException {
         String expectedContent = "Test-3: Test mustache file: receipt is Oz-Ware Purchase Invoice for Dorothy Gale" + lineSeparator()

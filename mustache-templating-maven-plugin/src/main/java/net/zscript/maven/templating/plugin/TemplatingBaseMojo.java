@@ -35,7 +35,7 @@ import org.apache.maven.shared.model.fileset.FileSet;
 import org.apache.maven.shared.model.fileset.util.FileSetManager;
 
 import net.zscript.maven.templating.contextloader.LoadableEntities;
-import net.zscript.maven.templating.contextloader.LoadableEntities.LoadedEntityContent;
+import net.zscript.maven.templating.contextloader.LoadableEntities.LoadedEntityScopes;
 import net.zscript.maven.templating.contextloader.TemplatingPluginContextLoader;
 
 /**
@@ -125,7 +125,7 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
         final LoadableEntities contextEntities = extractContextFileList(contextFileSet);
 
         // read in context files as YAML and perform any field mapping as required. Read in templates ready to use Mustache.
-        final List<LoadedEntityContent> loadedMappedContexts = loadMappedContexts(contextEntities);
+        final List<LoadedEntityScopes> loadedMappedScopes = loadMappedContexts(contextEntities);
         getLog().info("outputDir: " + outputDirectory);
 
         if (outputDirectory == null) {
@@ -137,7 +137,7 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
         createDirIfRequired(outputDirectoryPath);
 
         // This is the important bit: iterates the contexts and performs the actual Mustache templating.
-        for (LoadedEntityContent context : loadedMappedContexts) {
+        for (LoadedEntityScopes context : loadedMappedScopes) {
             try {
                 final Path outputFileFullPath = outputDirectoryPath.resolve(context.getRelativeOutputPath());
                 final Path outputParentDir    = outputFileFullPath.getParent();
@@ -145,7 +145,7 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
                 final Mustache mustache = mustacheFactory.compile(mainTemplate);
                 getLog().info("Applying context " + context.getRelativePath() + " with template " + mainTemplate + " to " + outputFileFullPath);
                 try (Writer out = Files.newBufferedWriter(outputFileFullPath)) {
-                    mustache.execute(out, context.getContents());
+                    mustache.execute(out, context.getScopes());
                 }
             } catch (final IOException e) {
                 throw new MojoExecutionException("Failed to generate output file: " + outputDirectoryPath, e);
@@ -298,7 +298,7 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
         return new LoadableEntities(rootUri, files, fileTypeSuffix, rootPath.getFileSystem());
     }
 
-    private List<LoadedEntityContent> loadMappedContexts(LoadableEntities contextEntities) throws MojoExecutionException {
+    private List<LoadedEntityScopes> loadMappedContexts(LoadableEntities contextEntities) throws MojoExecutionException {
         final TemplatingPluginContextLoader contextLoader;
         try {
             contextLoader = (TemplatingPluginContextLoader) Class.forName(contextLoaderClass).getDeclaredConstructor().newInstance();
