@@ -7,7 +7,9 @@ package net.zscript.maven.templating.contextloader;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,6 +19,7 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
@@ -25,8 +28,10 @@ import org.junit.jupiter.api.Test;
 class YamlTemplatingPluginContextLoaderTest {
     private final FileSystem fs = Jimfs.newFileSystem(Configuration.unix());
 
+    final YamlTemplatingPluginContextLoader contextLoader = new YamlTemplatingPluginContextLoader();
+
     @Test
-    public void shouldProductListOfLoadedEntities() throws IOException {
+    public void shouldProduceListOfLoadedEntities() throws IOException {
         // Dir must exist before creating URI, otherwise no trailing '/', https://github.com/google/jimfs/issues/16
         final Path rootDirPath = Files.createDirectory(fs.getPath("/foo"));
 
@@ -34,8 +39,7 @@ class YamlTemplatingPluginContextLoaderTest {
         final List<String> relPaths    = singletonList("baz/a.yaml");
         final String       suffix      = "java";
 
-        final LoadableEntities                  le            = new LoadableEntities(rootPathUri, relPaths, suffix, fs);
-        final YamlTemplatingPluginContextLoader contextLoader = new YamlTemplatingPluginContextLoader();
+        final LoadableEntities le = new LoadableEntities(rootPathUri, relPaths, suffix, fs);
 
         final Path yamlFile = fs.getPath("/foo", "baz", "a.yaml");
         Files.createDirectories(yamlFile.getParent());
@@ -53,5 +57,17 @@ class YamlTemplatingPluginContextLoaderTest {
         assertThat(context0.get("c")).isEqualTo("w3");
 
         assertThat(loadedEntities.get(0).getRelativeOutputPath()).isEqualTo(fs.getPath("baz/a.java"));
+    }
+
+    @Test
+    public void shouldFailWithNonexistentClasspathResource() throws URISyntaxException {
+        final LoadableEntities le = new LoadableEntities(new URI("classpath:/"), singletonList("bar"), "java", fs);
+        assertThatThrownBy(() -> contextLoader.loadAndMap(le)).isInstanceOf(UncheckedIOException.class).hasCauseInstanceOf(IOException.class);
+    }
+
+    @Test
+    public void shouldFailWithMissingFile() throws URISyntaxException {
+        final LoadableEntities le = new LoadableEntities(new URI("file:/"), singletonList("bar"), "java", fs);
+        assertThatThrownBy(() -> contextLoader.loadAndMap(le)).isInstanceOf(UncheckedIOException.class).hasCauseInstanceOf(IOException.class);
     }
 }

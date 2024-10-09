@@ -2,8 +2,10 @@
 
 [![Mustache Templating Maven Plugin Build](https://github.com/susanw1/mustache-templating-maven-plugin/actions/workflows/maven.yaml/badge.svg)](https://github.com/susanw1/mustache-templating-maven-plugin/actions/workflows/maven.yaml)
 [![codecov](https://codecov.io/gh/susanw1/mustache-templating-maven-plugin/graph/badge.svg?token=U1CDGHGJFY)](https://codecov.io/gh/susanw1/mustache-templating-maven-plugin)
-[![javadoc](https://javadoc.io/badge2/net.zscript.maven-templates/mustache-templating-maven-plugin/javadoc.svg)](https://javadoc.io/doc/net.zscript.maven-templates/mustache-templating-maven-plugin)
 [![CodeFactor](https://www.codefactor.io/repository/github/susanw1/mustache-templating-maven-plugin/badge)](https://www.codefactor.io/repository/github/susanw1/mustache-templating-maven-plugin)
+[![javadoc](https://javadoc.io/badge2/net.zscript.maven-templates/mustache-templating-maven-plugin/javadoc.svg)](https://javadoc.io/doc/net.zscript.maven-templates/mustache-templating-maven-plugin)
+[![Maven Central](https://img.shields.io/maven-central/v/net.zscript.maven-templates/mustache-templating.svg?label=Maven%20Central)](https://search.maven.org/artifact/net.zscript.maven-templates/mustache-templating)
+[![Apache License, Version 2.0, January 2004](https://img.shields.io/github/license/apache/maven.svg?label=License)](http://www.apache.org/licenses/LICENSE-2.0)
 
 This is a Maven Plugin for running templated file generation during a Maven build. You specify a template in the configuration, and a set of contexts to be used to populate
 the template, and an output file is generated per context. In its simplest form, a context is just a JSON or YAML file, perhaps just containing a few settings which get
@@ -29,7 +31,7 @@ The plugin needs to be configured into the POM file in the `<build><plugins>` se
     <plugin>
         <groupId>net.zscript.maven-templates</groupId>
         <artifactId>mustache-templating-maven-plugin</artifactId>
-        <version>0.1.0</version>
+        <version>1.0.0</version>
         <executions>
             <execution>
                 <id>templating-example</id>
@@ -90,7 +92,7 @@ project.
 
 The plugin is self-documenting. Try this (with the latest version):
 
-    mvn help:describe -Dplugin=net.zscript.maven-templates:mustache-templating-maven-plugin:0.1.0 -Ddetail
+    mvn help:describe -Dplugin=net.zscript.maven-templates:mustache-templating-maven-plugin:1.0.0 -Ddetail
 
 # Related Links and Support
 

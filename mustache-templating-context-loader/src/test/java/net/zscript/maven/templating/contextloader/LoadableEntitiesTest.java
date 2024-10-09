@@ -65,4 +65,11 @@ class LoadableEntitiesTest {
                         .loadEntities(e -> singletonList(e.withScopes(singletonList(""), fs.getPath("/baz")))))
                 .withMessageStartingWith("relativeOutputPath is absolute");
     }
+
+    @Test
+    void shouldRejectNonDirectoryRootPath() {
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> new LoadableEntities(new URI("/foo"), singletonList("bar"), "java", fs))
+                .withMessageStartingWith("Invalid directory URI");
+    }
 }
