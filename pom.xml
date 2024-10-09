@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.zscript.maven-templates</groupId>
@@ -8,8 +9,8 @@
 
     <name>Mustache Templating Plugin Package</name>
     <description>
-        A Maven Plugin for generating files and source-code using Mustache templates, with a pluggable
-        adapter system for constructing the contexts to populate those templates.
+        Project defining net.zscript.maven-templates:mustache-templating-maven-plugin, a Maven Plugin for generating files and source-code
+        using Mustache templates, with a pluggable adapter system for constructing the contexts to populate those templates.
         Developed for model-to-code generation in Zscript: https://github.com/susanw1/zscript
     </description>
     <url>https://github.com/susanw1/mustache-templating-maven-plugin</url>
@@ -95,11 +96,9 @@
     </properties>
 
     <modules>
+        <!-- Note, testing modules defined in (activeByDefault) profile, but disabled for release -->
         <module>mustache-templating-maven-plugin</module>
         <module>mustache-templating-context-loader</module>
-        <module>mustache-templating-tests</module>
-        <module>mustache-templating-test-contextloader</module>
-        <module>mustache-templating-test-resources</module>
     </modules>
 
     <dependencies>
@@ -199,7 +198,7 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>${version.maven-javadoc-plugin}</version>
                     <configuration>
-                        <detectLinks />
+                        <detectLinks/>
                         <source>${java.source.version}</source>
                     </configuration>
                     <executions>
@@ -309,7 +308,22 @@
 
     <profiles>
         <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>mustache-templating-tests</module>
+                <module>mustache-templating-test-contextloader</module>
+                <module>mustache-templating-test-resources</module>
+            </modules>
+        </profile>
+
+        <profile>
             <id>release</id>
+            <!--
+            Adds Javadoc, Sources and Signing - all required when releasing. Doesn't actually do the release!
+            -->
             <build>
                 <plugins>
                     <plugin>

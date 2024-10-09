@@ -60,13 +60,13 @@ class YamlTemplatingPluginContextLoaderTest {
     }
 
     @Test
-    public void shouldFailWithNonexistentClasspathResource() throws IOException, URISyntaxException {
+    public void shouldFailWithNonexistentClasspathResource() throws URISyntaxException {
         final LoadableEntities le = new LoadableEntities(new URI("classpath:/"), singletonList("bar"), "java", fs);
         assertThatThrownBy(() -> contextLoader.loadAndMap(le)).isInstanceOf(UncheckedIOException.class).hasCauseInstanceOf(IOException.class);
     }
 
     @Test
-    public void shouldFailWithMissingFile() throws IOException, URISyntaxException {
+    public void shouldFailWithMissingFile() throws URISyntaxException {
         final LoadableEntities le = new LoadableEntities(new URI("file:/"), singletonList("bar"), "java", fs);
         assertThatThrownBy(() -> contextLoader.loadAndMap(le)).isInstanceOf(UncheckedIOException.class).hasCauseInstanceOf(IOException.class);
     }
