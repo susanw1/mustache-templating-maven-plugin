@@ -29,7 +29,7 @@ The plugin needs to be configured into the POM file in the `<build><plugins>` se
     <plugin>
         <groupId>net.zscript.maven-templates</groupId>
         <artifactId>mustache-templating-maven-plugin</artifactId>
-        <version>0.1.0</version>
+        <version>1.0.0</version>
         <executions>
             <execution>
                 <id>templating-example</id>
@@ -90,7 +90,7 @@ project.
 
 The plugin is self-documenting. Try this (with the latest version):
 
-    mvn help:describe -Dplugin=net.zscript.maven-templates:mustache-templating-maven-plugin:0.1.0 -Ddetail
+    mvn help:describe -Dplugin=net.zscript.maven-templates:mustache-templating-maven-plugin:1.0.0 -Ddetail
 
 # Related Links and Support
 
