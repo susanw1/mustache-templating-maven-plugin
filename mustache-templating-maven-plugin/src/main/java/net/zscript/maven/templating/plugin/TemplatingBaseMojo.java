@@ -7,14 +7,17 @@ package net.zscript.maven.templating.plugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLConnection;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,7 +30,6 @@ import com.github.mustachejava.MustacheFactory;
 import com.github.mustachejava.MustacheResolver;
 import com.github.mustachejava.resolver.ClasspathResolver;
 import com.github.mustachejava.resolver.FileSystemResolver;
-import com.github.mustachejava.resolver.URIResolver;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -274,8 +276,7 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
 
     private MustacheResolver createUriResolver(URI templateDirectoryUri) {
         final URI directoryUri = withTrailingSlash(templateDirectoryUri);
-        final URIResolver uriResolver = new URIResolver();
-        final MustacheResolver resolver = resourceName -> uriResolver.getReader(resolveUri(directoryUri, resourceName).toString());
+        final MustacheResolver resolver = resourceName -> openUri(resolveUri(directoryUri, resourceName));
 
         try (Reader reader = resolver.getReader(mainTemplate)) {
             if (reader == null) {
@@ -285,6 +286,18 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
             throw new TemplatingMojoFailureException("Cannot read template: " + resolveUri(directoryUri, mainTemplate), e);
         }
         return resolver;
+    }
+
+    private Reader openUri(URI resourceUri) {
+        try {
+            final URLConnection connection = resourceUri.toURL().openConnection();
+            // In particular, do not leave JarFiles cached: Windows cannot delete a cached JAR.
+            connection.setUseCaches(false);
+            return new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            getLog().debug("Cannot read template URL: " + resourceUri, e);
+            return null;
+        }
     }
 
     private URI resolveUri(URI directoryUri, String resourceName) {
