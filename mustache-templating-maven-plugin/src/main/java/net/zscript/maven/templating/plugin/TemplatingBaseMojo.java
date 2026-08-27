@@ -275,19 +275,33 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
     private MustacheResolver createUriResolver(URI templateDirectoryUri) {
         final URI directoryUri = withTrailingSlash(templateDirectoryUri);
         final URIResolver uriResolver = new URIResolver();
-        final MustacheResolver resolver = resourceName -> uriResolver.getReader(directoryUri.resolve(resourceName).toString());
+        final MustacheResolver resolver = resourceName -> uriResolver.getReader(resolveUri(directoryUri, resourceName).toString());
 
         try (Reader reader = resolver.getReader(mainTemplate)) {
             if (reader == null) {
-                throw new TemplatingMojoFailureException("Cannot locate template: " + directoryUri.resolve(mainTemplate));
+                throw new TemplatingMojoFailureException("Cannot locate template: " + resolveUri(directoryUri, mainTemplate));
             }
         } catch (IOException e) {
-            throw new TemplatingMojoFailureException("Cannot read template: " + directoryUri.resolve(mainTemplate), e);
+            throw new TemplatingMojoFailureException("Cannot read template: " + resolveUri(directoryUri, mainTemplate), e);
         }
         return resolver;
     }
 
+    private URI resolveUri(URI directoryUri, String resourceName) {
+        if (!directoryUri.isOpaque()) {
+            return directoryUri.resolve(resourceName);
+        }
+        return URI.create(directoryUri.getScheme() + ":" + directoryUri.getRawSchemeSpecificPart() + resourceName);
+    }
+
     private URI withTrailingSlash(URI directoryUri) {
+        if (directoryUri.isOpaque()) {
+            final String schemeSpecificPart = directoryUri.getRawSchemeSpecificPart();
+            if (schemeSpecificPart.endsWith("/")) {
+                return directoryUri;
+            }
+            return URI.create(directoryUri.getScheme() + ":" + schemeSpecificPart + "/");
+        }
         final String path = directoryUri.getPath();
         if (path == null || path.endsWith("/")) {
             return directoryUri;
