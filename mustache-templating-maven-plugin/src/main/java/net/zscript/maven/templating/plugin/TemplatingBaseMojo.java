@@ -177,13 +177,25 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
                 return createFileResolverFromDefaultRoots();
             }
 
+            // A Windows drive path such as C:\\templates is not a valid URI, but URI parsing must happen
+            // before FS.getPath() because Windows rejects the colon in URL-style values.
+            final URI dirUri = isWindowsDrivePath(templateDirectory) ? null : new URI(templateDirectory);
+            if (dirUri != null && dirUri.getScheme() != null) {
+                if (dirUri.getScheme().equals("classpath")) {
+                    final String path         = dirUri.getPath();
+                    final String resourceRoot = path.startsWith("/") ? path.substring(1) : path;
+                    getLog().debug(messagePrefix + ": use ClasspathResolver with resourceRoot: " + resourceRoot);
+                    return new ClasspathResolver(resourceRoot);
+                } else {
+                    getLog().debug(messagePrefix + ": use URI resolver with resourceRoot: " + dirUri);
+                    return createUriResolver(dirUri);
+                }
+            }
+
             final Path configuredPath = FS.getPath(templateDirectory);
             if (configuredPath.isAbsolute()) {
                 return requireFileResolver(createFileResolver(configuredPath));
-            }
-
-            final URI dirUri = new URI(templateDirectory);
-            if (dirUri.getScheme() == null) {
+            } else {
                 final Path projectTemplateDirectory = project.getBasedir().toPath().resolve(configuredPath).normalize();
                 MustacheResolver mustacheResolver = createFileResolver(projectTemplateDirectory);
                 if (mustacheResolver != null) {
@@ -191,19 +203,13 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
                 }
                 return createFileResolverFromDefaultRoots(configuredPath);
             }
-
-            if (dirUri.getScheme().equals("classpath")) {
-                final String path         = dirUri.getPath();
-                final String resourceRoot = path.startsWith("/") ? path.substring(1) : path;
-                getLog().debug(messagePrefix + ": use ClasspathResolver with resourceRoot: " + resourceRoot);
-                return new ClasspathResolver(resourceRoot);
-            } else {
-                getLog().debug(messagePrefix + ": use URI resolver with resourceRoot: " + dirUri);
-                return createUriResolver(dirUri);
-            }
         } catch (URISyntaxException e1) {
             throw new TemplatingMojoFailureException("Bad template directory URI: " + templateDirectory, e1);
         }
+    }
+
+    private boolean isWindowsDrivePath(String path) {
+        return path.length() >= 2 && Character.isLetter(path.charAt(0)) && path.charAt(1) == ':';
     }
 
     private MustacheResolver createFileResolverFromDefaultRoots() {
