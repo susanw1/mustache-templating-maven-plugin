@@ -74,6 +74,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.source.version>8</java.source.version>
         <java.target.version>8</java.target.version>
+        <java.test.version>21</java.test.version>
 
         <version.mustache>0.9.14</version.mustache>
         <version.snakeyaml>2.6</version.snakeyaml>
@@ -151,9 +152,22 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${version.maven-compiler-plugin}</version>
                     <configuration>
-                        <source>${java.source.version}</source>
-                        <target>${java.target.version}</target>
+                        <!-- Compiles main plugin source with strict Java 8 rules -->
+                        <release>${java.target.version}</release>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <id>default-testCompile</id>
+                            <phase>test-compile</phase>
+                            <goals>
+                                <goal>testCompile</goal>
+                            </goals>
+                            <configuration>
+                                <!-- Allows test classes to use Java 17 features required by JUnit 6 -->
+                                <release>${java.test.version}</release>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
