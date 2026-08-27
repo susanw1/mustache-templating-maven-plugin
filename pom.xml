@@ -94,12 +94,14 @@
         <version.maven-gpg-plugin>3.2.8</version.maven-gpg-plugin>
         <version.maven-release-plugin>3.3.1</version.maven-release-plugin>
         <version.maven-nexus-staging-plugin>1.7.0</version.maven-nexus-staging-plugin>
+        <version.maven-invoker-plugin>3.10.1</version.maven-invoker-plugin>
+        <version.maven-jar-plugin>3.5.1</version.maven-jar-plugin>
+        <skipITs>false</skipITs>
     </properties>
 
     <modules>
-        <!-- Note, testing modules defined in (activeByDefault) profile, but disabled for release -->
-        <module>mustache-templating-maven-plugin</module>
         <module>mustache-templating-context-loader</module>
+        <module>mustache-templating-maven-plugin</module>
     </modules>
 
     <dependencies>
@@ -322,18 +324,6 @@
 
     <profiles>
         <profile>
-            <id>default</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <modules>
-                <module>mustache-templating-tests</module>
-                <module>mustache-templating-test-contextloader</module>
-                <module>mustache-templating-test-resources</module>
-            </modules>
-        </profile>
-
-        <profile>
             <id>release</id>
             <!--
             Adds Javadoc, Sources and Signing - all required when releasing. Doesn't actually do the release!
@@ -354,6 +344,9 @@
                     </plugin>
                 </plugins>
             </build>
+            <properties>
+                <skipITs>true</skipITs>
+            </properties>
         </profile>
     </profiles>
 </project>

@@ -80,7 +80,7 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
      * to perform arbitrary transformations from any file-type you can read.
      * <p>
      * The class you specify here must be built in a separate Maven module from the one you want to use it, which must be added as a dependency of the plugin execution definition.
-     * See the separate test project _mustache-templating-tests_ for an example.
+     * See the integration-test examples under {@code src/it} for examples.
      */
     @Parameter(defaultValue = "net.zscript.maven.templating.contextloader.YamlTemplatingPluginContextLoader")
     protected String contextLoaderClass;
