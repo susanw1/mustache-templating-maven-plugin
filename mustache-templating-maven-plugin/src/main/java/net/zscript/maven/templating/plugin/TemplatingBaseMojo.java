@@ -7,6 +7,7 @@ package net.zscript.maven.templating.plugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,8 +26,8 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.github.mustachejava.MustacheResolver;
 import com.github.mustachejava.resolver.ClasspathResolver;
-import com.github.mustachejava.resolver.DefaultResolver;
 import com.github.mustachejava.resolver.FileSystemResolver;
+import com.github.mustachejava.resolver.URIResolver;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -171,63 +172,110 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
     private MustacheResolver createMustacheResolver() {
         final String messagePrefix = "Main Template resolution for \"" + mainTemplate + "\": ";
 
-        MustacheResolver mustacheResolver = null;
         try {
-            if (templateDirectory == null || templateDirectory.isEmpty()
-                    || new File(templateDirectory).isAbsolute()
-                    || new URI(templateDirectory).getScheme() == null) {
-                if (templateDirectory != null && !templateDirectory.isEmpty()) {
-                    mustacheResolver = createFileResolver(FS.getPath(templateDirectory));
-                }
-                if (mustacheResolver == null) {
-                    for (String defaultDir : templateRootDirs) {
-                        final Path resolvedDir = project.getBasedir().toPath().resolve(defaultDir);
-                        mustacheResolver = createFileResolver(resolvedDir);
-                        if (mustacheResolver != null) {
-                            break;
-                        }
-                    }
-                }
-                if (mustacheResolver == null) {
-                    throw new TemplatingMojoFailureException("Cannot locate template: " + mainTemplate);
-                }
-                return mustacheResolver;
+            if (templateDirectory == null || templateDirectory.isEmpty()) {
+                return createFileResolverFromDefaultRoots();
+            }
+
+            final Path configuredPath = FS.getPath(templateDirectory);
+            if (configuredPath.isAbsolute()) {
+                return requireFileResolver(createFileResolver(configuredPath));
             }
 
             final URI dirUri = new URI(templateDirectory);
+            if (dirUri.getScheme() == null) {
+                final Path projectTemplateDirectory = project.getBasedir().toPath().resolve(configuredPath).normalize();
+                MustacheResolver mustacheResolver = createFileResolver(projectTemplateDirectory);
+                if (mustacheResolver != null) {
+                    return mustacheResolver;
+                }
+                return createFileResolverFromDefaultRoots(configuredPath);
+            }
+
             if (dirUri.getScheme().equals("classpath")) {
                 final String path         = dirUri.getPath();
                 final String resourceRoot = path.startsWith("/") ? path.substring(1) : path;
                 getLog().debug(messagePrefix + ": use ClasspathResolver with resourceRoot: " + resourceRoot);
                 return new ClasspathResolver(resourceRoot);
             } else {
-                getLog().debug(messagePrefix + ": use DefaultResolver with resourceRoot: " + dirUri.getPath());
-                return new DefaultResolver(dirUri.getPath());
+                getLog().debug(messagePrefix + ": use URI resolver with resourceRoot: " + dirUri);
+                return createUriResolver(dirUri);
             }
         } catch (URISyntaxException e1) {
-            throw new TemplatingMojoFailureException("Bad URI: " + mainTemplate, e1);
+            throw new TemplatingMojoFailureException("Bad template directory URI: " + templateDirectory, e1);
         }
     }
 
-    private MustacheResolver createFileResolver(Path templateRootCandidate) {
-        if (!Files.isDirectory(templateRootCandidate)) {
-            getLog().debug("  checked possible base dir (doesn't exist): " + templateRootCandidate);
+    private MustacheResolver createFileResolverFromDefaultRoots() {
+        for (String defaultDir : templateRootDirs) {
+            MustacheResolver mustacheResolver = createFileResolver(project.getBasedir().toPath().resolve(defaultDir));
+            if (mustacheResolver != null) {
+                return mustacheResolver;
+            }
+        }
+        throw new TemplatingMojoFailureException("Cannot locate template: " + mainTemplate);
+    }
+
+    private MustacheResolver createFileResolverFromDefaultRoots(Path relativeTemplateDirectory) {
+        for (String defaultDir : templateRootDirs) {
+            final Path templateDirectory = project.getBasedir().toPath().resolve(defaultDir).resolve(relativeTemplateDirectory).normalize();
+            MustacheResolver mustacheResolver = createFileResolver(templateDirectory);
+            if (mustacheResolver != null) {
+                return mustacheResolver;
+            }
+        }
+        throw new TemplatingMojoFailureException("Cannot locate template: " + mainTemplate);
+    }
+
+    private MustacheResolver requireFileResolver(MustacheResolver mustacheResolver) {
+        if (mustacheResolver == null) {
+            throw new TemplatingMojoFailureException("Cannot locate template: " + mainTemplate);
+        }
+        return mustacheResolver;
+    }
+
+    private MustacheResolver createFileResolver(Path templateDirectoryPath) {
+        if (!Files.isDirectory(templateDirectoryPath)) {
+            getLog().debug("  checked possible template dir (doesn't exist): " + templateDirectoryPath);
             return null;
         }
-        final Path resolvedTemplateDir = templateDirectory == null ? templateRootCandidate : templateRootCandidate.resolve(templateDirectory);
-        if (!Files.isDirectory(resolvedTemplateDir)) {
-            getLog().debug("  checked possible template root dir (doesn't exist): " + templateRootCandidate);
-            return null;
-        }
-        final Path mainTemplateFullPath = templateRootCandidate.resolve(mainTemplate);
+        final Path mainTemplateFullPath = templateDirectoryPath.resolve(mainTemplate);
 
         if (!Files.isRegularFile(mainTemplateFullPath)) {
-            getLog().debug("  possible template root dir exists: " + templateRootCandidate);
+            getLog().debug("  possible template dir exists: " + templateDirectoryPath);
             getLog().debug("  but template doesn't: " + mainTemplateFullPath);
             return null;
         }
-        getLog().info("Template found in dir: " + templateRootCandidate);
-        return new FileSystemResolver(resolvedTemplateDir.toFile());
+        getLog().info("Template found in dir: " + templateDirectoryPath);
+        return new FileSystemResolver(templateDirectoryPath.toFile());
+    }
+
+    private MustacheResolver createUriResolver(URI templateDirectoryUri) {
+        final URI directoryUri = withTrailingSlash(templateDirectoryUri);
+        final URIResolver uriResolver = new URIResolver();
+        final MustacheResolver resolver = resourceName -> uriResolver.getReader(directoryUri.resolve(resourceName).toString());
+
+        try (Reader reader = resolver.getReader(mainTemplate)) {
+            if (reader == null) {
+                throw new TemplatingMojoFailureException("Cannot locate template: " + directoryUri.resolve(mainTemplate));
+            }
+        } catch (IOException e) {
+            throw new TemplatingMojoFailureException("Cannot read template: " + directoryUri.resolve(mainTemplate), e);
+        }
+        return resolver;
+    }
+
+    private URI withTrailingSlash(URI directoryUri) {
+        final String path = directoryUri.getPath();
+        if (path == null || path.endsWith("/")) {
+            return directoryUri;
+        }
+        try {
+            return new URI(directoryUri.getScheme(), directoryUri.getUserInfo(), directoryUri.getHost(), directoryUri.getPort(),
+                    path + "/", directoryUri.getQuery(), directoryUri.getFragment());
+        } catch (URISyntaxException e) {
+            throw new TemplatingMojoFailureException("Bad template directory URI: " + directoryUri, e);
+        }
     }
 
     private void createDirIfRequired(final Path outputDirectoryPath) throws MojoExecutionException {
