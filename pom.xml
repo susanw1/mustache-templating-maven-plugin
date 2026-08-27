@@ -83,7 +83,7 @@
         <version.jimfs>1.3.0</version.jimfs>
         <version.apachecommons>2.17.0</version.apachecommons>
 
-        <version.maven>3.9.9</version.maven>
+        <version.maven>3.9.16</version.maven>
         <version.jacoco-maven-plugin>0.8.12</version.jacoco-maven-plugin>
         <version.maven-javadoc-plugin>3.10.1</version.maven-javadoc-plugin>
         <version.maven-source-plugin>3.3.1</version.maven-source-plugin>
