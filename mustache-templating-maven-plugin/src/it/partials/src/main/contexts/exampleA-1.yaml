@@ -1,0 +1,12 @@
+receipt: Oz-Ware Purchase Invoice
+customer:
+    first_name: Dorothy
+    family_name: Gale
+bill-to:
+    street: |
+        123 Tornado Alley
+        Suite 16
+ship-to:
+    street: |
+        123 Tornado Alley
+        Suite 16

@@ -87,8 +87,9 @@ To make context loading/mapping work, you need to:
 
 # More information
 
-More examples may be found in the `pom.xml` in the [_mustache-templating-tests_](https://github.com/susanw1/mustache-templating-maven-plugin/tree/main/mustache-templating-tests)
-project.
+The plugin's integration-test examples are under
+[`mustache-templating-maven-plugin/src/it`](https://github.com/susanw1/mustache-templating-maven-plugin/tree/main/mustache-templating-maven-plugin/src/it).
+They are run with the Maven Invoker Plugin during `verify`.
 
 The plugin is self-documenting. Try this (with the latest version):
 
