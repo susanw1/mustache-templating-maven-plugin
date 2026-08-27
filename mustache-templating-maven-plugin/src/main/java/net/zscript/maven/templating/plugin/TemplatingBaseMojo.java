@@ -184,7 +184,7 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
             final URI dirUri = !isWindowsDrivePath(templateDirectory) && hasUriScheme(templateDirectory) ? new URI(templateDirectory) : null;
             if (dirUri != null && dirUri.getScheme() != null) {
                 if (dirUri.getScheme().equals("classpath")) {
-                    final String path         = dirUri.getPath();
+                    final String path         = dirUri.getPath() == null ? dirUri.getRawSchemeSpecificPart() : dirUri.getPath();
                     final String resourceRoot = path.startsWith("/") ? path.substring(1) : path;
                     getLog().debug(messagePrefix + ": use ClasspathResolver with resourceRoot: " + resourceRoot);
                     return new ClasspathResolver(resourceRoot);
