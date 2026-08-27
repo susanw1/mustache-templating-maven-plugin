@@ -177,9 +177,9 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
                 return createFileResolverFromDefaultRoots();
             }
 
-            // A Windows drive path such as C:\\templates is not a valid URI, but URI parsing must happen
-            // before FS.getPath() because Windows rejects the colon in URL-style values.
-            final URI dirUri = isWindowsDrivePath(templateDirectory) ? null : new URI(templateDirectory);
+            // URL-style values must be identified before FS.getPath() because Windows rejects the colon in
+            // URI values. Windows drive paths are the exception: C:\\templates is a filesystem path, not a URI.
+            final URI dirUri = !isWindowsDrivePath(templateDirectory) && hasUriScheme(templateDirectory) ? new URI(templateDirectory) : null;
             if (dirUri != null && dirUri.getScheme() != null) {
                 if (dirUri.getScheme().equals("classpath")) {
                     final String path         = dirUri.getPath();
@@ -210,6 +210,22 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
 
     private boolean isWindowsDrivePath(String path) {
         return path.length() >= 2 && Character.isLetter(path.charAt(0)) && path.charAt(1) == ':';
+    }
+
+    private boolean hasUriScheme(String value) {
+        if (value.isEmpty() || !Character.isLetter(value.charAt(0))) {
+            return false;
+        }
+        for (int i = 1; i < value.length(); i++) {
+            final char character = value.charAt(i);
+            if (character == ':') {
+                return true;
+            }
+            if (!Character.isLetterOrDigit(character) && character != '+' && character != '-' && character != '.') {
+                return false;
+            }
+        }
+        return false;
     }
 
     private MustacheResolver createFileResolverFromDefaultRoots() {
