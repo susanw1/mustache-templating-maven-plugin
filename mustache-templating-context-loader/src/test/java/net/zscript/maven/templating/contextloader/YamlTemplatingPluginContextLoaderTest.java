@@ -62,12 +62,58 @@ class YamlTemplatingPluginContextLoaderTest {
     @Test
     public void shouldFailWithNonexistentClasspathResource() throws URISyntaxException {
         final LoadableEntities le = new LoadableEntities(new URI("classpath:/"), singletonList("bar"), "java", fs);
-        assertThatThrownBy(() -> contextLoader.loadAndMap(le)).isInstanceOf(UncheckedIOException.class).hasCauseInstanceOf(IOException.class);
+        assertThatThrownBy(() -> contextLoader.loadAndMap(le))
+                .isInstanceOf(UncheckedIOException.class)
+                .hasCauseInstanceOf(IOException.class)
+                .hasMessageContaining("classpath:/bar")
+                .hasMessageContaining("Context resource not found");
     }
 
     @Test
     public void shouldFailWithMissingFile() throws URISyntaxException {
         final LoadableEntities le = new LoadableEntities(new URI("file:/"), singletonList("bar"), "java", fs);
-        assertThatThrownBy(() -> contextLoader.loadAndMap(le)).isInstanceOf(UncheckedIOException.class).hasCauseInstanceOf(IOException.class);
+        assertThatThrownBy(() -> contextLoader.loadAndMap(le))
+                .isInstanceOf(UncheckedIOException.class)
+                .hasCauseInstanceOf(IOException.class)
+                .hasMessageContaining("file:/bar")
+                .hasMessageContaining("Context resource not found");
+    }
+
+    @Test
+    public void shouldReportMalformedYamlWithResource() throws Exception {
+        final Path rootDirPath = Files.createDirectory(fs.getPath("/malformed"));
+        final Path yamlFile = Files.createFile(rootDirPath.resolve("context.yaml"));
+        Files.write(yamlFile, singletonList("value: [unterminated"));
+        final LoadableEntities le = new LoadableEntities(rootDirPath.toUri(), singletonList("context.yaml"), "java", fs);
+
+        assertThatThrownBy(() -> contextLoader.loadAndMap(le))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Malformed YAML in context resource '" + yamlFile.toUri() + "'")
+                .hasCauseInstanceOf(org.yaml.snakeyaml.error.YAMLException.class);
+    }
+
+    @Test
+    public void shouldRejectNonMappingTopLevelContext() throws Exception {
+        final Path rootDirPath = Files.createDirectory(fs.getPath("/invalid-top-level"));
+        final Path yamlFile = Files.createFile(rootDirPath.resolve("context.yaml"));
+        Files.write(yamlFile, singletonList("just a scalar"));
+        final LoadableEntities le = new LoadableEntities(rootDirPath.toUri(), singletonList("context.yaml"), "java", fs);
+
+        assertThatThrownBy(() -> contextLoader.loadAndMap(le))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Context resource '" + yamlFile.toUri() + "' must contain a top-level mapping")
+                .hasMessageContaining("java.lang.String");
+    }
+
+    @Test
+    public void shouldRejectEmptyTopLevelContext() throws Exception {
+        final Path rootDirPath = Files.createDirectory(fs.getPath("/empty-top-level"));
+        final Path yamlFile = Files.createFile(rootDirPath.resolve("context.yaml"));
+        final LoadableEntities le = new LoadableEntities(rootDirPath.toUri(), singletonList("context.yaml"), "java", fs);
+
+        assertThatThrownBy(() -> contextLoader.loadAndMap(le))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Context resource '" + yamlFile.toUri() + "' must contain a top-level mapping")
+                .hasMessageContaining("null");
     }
 }
