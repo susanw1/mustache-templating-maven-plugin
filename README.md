@@ -58,6 +58,7 @@ Key points:
   the specified output directory (eg _src/main/contexts/foo/example1.yaml_ becomes _target/classes/templates-out/test1/foo/example1.txt_).
 * the template file used is found under _src/main/templates_ by default - and if you use Mustache 'partials' (inclusions), then `{{> mypartial.mustache}}` is expected to be
   relative to that same directory.
+* generated files are always written as UTF-8, regardless of the platform's default charset.
 
 ## Context Loading and Mapping
 
