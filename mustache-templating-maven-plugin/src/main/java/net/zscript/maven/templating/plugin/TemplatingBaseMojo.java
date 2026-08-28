@@ -361,6 +361,9 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
             URI rootUri = new URI(directoryString);
             if (rootUri.getScheme() != null) {
                 getLog().debug("Context: directory is valid URI, so assuming using limited 'includes' paths: " + directoryString);
+                if (failIfNoFiles && fileSet.getIncludes().isEmpty()) {
+                    throw new MojoExecutionException("No matching Context files found in: " + directoryString);
+                }
                 return new LoadableEntities(rootUri, fileSet.getIncludes(), fileTypeSuffix, FS);
             }
         } catch (URISyntaxException e) {
