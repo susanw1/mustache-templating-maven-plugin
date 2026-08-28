@@ -51,6 +51,17 @@ class LoadableEntitiesTest {
     }
 
     @Test
+    void shouldUseUriSeparatorsWhenResolvingWindowsRelativePaths() throws URISyntaxException {
+        final FileSystem windowsFs = Jimfs.newFileSystem(Configuration.windows());
+        final LoadableEntities le = new LoadableEntities(new URI("file:///foo/"), singletonList("baz\\a.yaml"), "java", windowsFs);
+
+        assertThat(le.loadEntities(entity -> singletonList(entity.withScopes(singletonList(""), windowsFs.getPath("a.java")))))
+                .singleElement()
+                .extracting(LoadableEntities.LoadedEntityScopes::getFullPath)
+                .isEqualTo(new URI("file:///foo/baz/a.yaml"));
+    }
+
+    @Test
     void shouldRejectAbsoluteEntityPath() {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> new LoadableEntities(new URI("/foo/"), singletonList("/bar"), "java", fs)
