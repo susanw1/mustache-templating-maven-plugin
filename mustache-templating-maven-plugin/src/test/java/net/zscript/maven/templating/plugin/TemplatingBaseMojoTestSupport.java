@@ -7,6 +7,9 @@ import java.nio.file.Path;
 
 import com.github.mustachejava.MustacheResolver;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.model.fileset.FileSet;
+
+import net.zscript.maven.templating.contextloader.LoadableEntities;
 
 final class TemplatingBaseMojoTestSupport {
     private TemplatingBaseMojoTestSupport() {
@@ -24,6 +27,10 @@ final class TemplatingBaseMojoTestSupport {
 
     static MustacheResolver createMustacheResolver(TemplatingMojo mojo) throws Exception {
         return (MustacheResolver) invoke(mojo, "createMustacheResolver");
+    }
+
+    static LoadableEntities extractContextFileList(TemplatingMojo mojo, FileSet fileSet) throws Exception {
+        return (LoadableEntities) invoke(mojo, "extractContextFileList", FileSet.class, fileSet);
     }
 
     private static Object invoke(TemplatingMojo mojo, String methodName) throws Exception {
@@ -51,4 +58,5 @@ final class TemplatingBaseMojoTestSupport {
             throw e;
         }
     }
+
 }
