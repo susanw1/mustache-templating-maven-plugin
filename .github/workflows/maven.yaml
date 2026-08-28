@@ -3,7 +3,7 @@ name: Mustache Templating Maven Plugin Build
 on: [ push ]
 
 jobs:
-    build:
+    matrix_build:
         name: Maven Build on ${{ matrix.os }}
         runs-on: ${{ matrix.os }}
         strategy:
@@ -35,3 +35,11 @@ jobs:
 #        name: codecov-umbrella #optional
 #        yml: ./codecov.yml #optional
 #        fail_ci_if_error: true #optional (default = false)
+
+    build:
+        name: Builds completed
+        needs: matrix_build
+        runs-on: ubuntu-latest
+        steps:
+          - name: Done
+            run: echo "All OS environments successfully passed!"
