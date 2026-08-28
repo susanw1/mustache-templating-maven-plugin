@@ -6,10 +6,12 @@
 package net.zscript.maven.templating.plugin.it;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UncheckedIOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -47,16 +49,22 @@ public class ExampleContextLoader implements TemplatingPluginContextLoader {
         final Path relativePathToOutput = createDefaultOutputPath(
                 relativePathToSource, entity.getFileTypeSuffix(), entity.getFileSystem());
 
-        try (Reader reader = new BufferedReader(new InputStreamReader(
-                entity.getFullPathAsUrl().openStream(), UTF_8))) {
-            Properties properties = new Properties();
-            properties.load(reader);
+        try {
+            final URL resourceUrl = entity.getFullPathAsUrl();
+            if (resourceUrl == null) {
+                throw new UncheckedIOException(new IOException("Context resource not found: " + entity.getFullPath()));
+            }
+
+            final Properties properties = new Properties();
+            try (Reader reader = new BufferedReader(new InputStreamReader(resourceUrl.openStream(), UTF_8))) {
+                properties.load(reader);
+            }
 
             return singletonList(entity.withScopes(Arrays.asList(extra, properties), relativePathToOutput));
-        } catch (NullPointerException ex) {
-            throw new UncheckedIOException(new IOException("Failed to read from: " + entity.getFullPath(), ex));
+        } catch (FileNotFoundException ex) {
+            throw new UncheckedIOException(new IOException("Context resource not found: " + entity.getFullPath(), ex));
         } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
+            throw new UncheckedIOException(new IOException("Failed to read context resource '" + entity.getFullPath() + "'", ex));
         }
     }
 }
