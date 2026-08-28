@@ -142,11 +142,7 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
         // This is the important bit: iterates the contexts and performs the actual Mustache templating.
         for (LoadedEntityScopes context : loadedMappedScopes) {
             try {
-                final Path outputFileFullPath = outputDirectoryPath.resolve(context.getRelativeOutputPath()).normalize();
-                if (!outputFileFullPath.startsWith(outputDirectoryPath)) {
-                    throw new MojoExecutionException("Generated output path escapes outputDirectory: "
-                            + context.getRelativeOutputPath() + " (outputDirectory: " + outputDirectoryPath + ")");
-                }
+                final Path outputFileFullPath = resolveOutputFile(outputDirectoryPath, context.getRelativeOutputPath());
                 final Path outputParentDir    = outputFileFullPath.getParent();
                 createDirIfRequired(outputParentDir);
                 final Mustache mustache = mustacheFactory.compile(mainTemplate);
@@ -164,6 +160,24 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
         }
 
         return null;
+    }
+
+    static Path resolveOutputFile(final Path outputDirectoryPath, final Path relativeOutputPath) throws MojoExecutionException {
+        final Path normalizedOutputFilePath = outputDirectoryPath.resolve(relativeOutputPath).normalize();
+        if (!normalizedOutputFilePath.startsWith(outputDirectoryPath)) {
+            throw new MojoExecutionException("Generated output path escapes outputDirectory: "
+                    + relativeOutputPath + " (outputDirectory: " + outputDirectoryPath + ")");
+        }
+
+        Path currentPath = outputDirectoryPath;
+        for (Path component : outputDirectoryPath.relativize(normalizedOutputFilePath)) {
+            currentPath = currentPath.resolve(component);
+            if (Files.isSymbolicLink(currentPath)) {
+                throw new MojoExecutionException("Generated output path contains a symbolic link: "
+                        + relativeOutputPath + " (outputDirectory: " + outputDirectoryPath + ")");
+            }
+        }
+        return normalizedOutputFilePath;
     }
 
     /**
