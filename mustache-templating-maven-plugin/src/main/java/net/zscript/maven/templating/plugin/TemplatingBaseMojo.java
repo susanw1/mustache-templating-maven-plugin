@@ -147,7 +147,7 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
                 createDirIfRequired(outputParentDir);
                 final Mustache mustache = mustacheFactory.compile(mainTemplate);
                 getLog().info("Applying context " + context.getRelativePath() + " with template " + mainTemplate + " to " + outputFileFullPath);
-                try (Writer out = Files.newBufferedWriter(outputFileFullPath)) {
+                try (Writer out = Files.newBufferedWriter(outputFileFullPath, StandardCharsets.UTF_8)) {
                     mustache.execute(out, context.getScopes());
                 }
             } catch (final IOException e) {
