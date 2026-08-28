@@ -7,13 +7,17 @@ package net.zscript.maven.templating.plugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLConnection;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,7 +29,6 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.github.mustachejava.MustacheResolver;
 import com.github.mustachejava.resolver.ClasspathResolver;
-import com.github.mustachejava.resolver.DefaultResolver;
 import com.github.mustachejava.resolver.FileSystemResolver;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -171,63 +174,157 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
     private MustacheResolver createMustacheResolver() {
         final String messagePrefix = "Main Template resolution for \"" + mainTemplate + "\": ";
 
-        MustacheResolver mustacheResolver = null;
         try {
-            if (templateDirectory == null || templateDirectory.isEmpty()
-                    || new File(templateDirectory).isAbsolute()
-                    || new URI(templateDirectory).getScheme() == null) {
-                if (templateDirectory != null && !templateDirectory.isEmpty()) {
-                    mustacheResolver = createFileResolver(FS.getPath(templateDirectory));
-                }
-                if (mustacheResolver == null) {
-                    for (String defaultDir : templateRootDirs) {
-                        final Path resolvedDir = project.getBasedir().toPath().resolve(defaultDir);
-                        mustacheResolver = createFileResolver(resolvedDir);
-                        if (mustacheResolver != null) {
-                            break;
-                        }
-                    }
-                }
-                if (mustacheResolver == null) {
-                    throw new TemplatingMojoFailureException("Cannot locate template: " + mainTemplate);
-                }
-                return mustacheResolver;
+            if (templateDirectory == null || templateDirectory.isEmpty()) {
+                return createFileResolverFromDefaultRoots();
             }
 
-            final URI dirUri = new URI(templateDirectory);
-            if (dirUri.getScheme().equals("classpath")) {
-                final String path         = dirUri.getPath();
-                final String resourceRoot = path.startsWith("/") ? path.substring(1) : path;
-                getLog().debug(messagePrefix + ": use ClasspathResolver with resourceRoot: " + resourceRoot);
-                return new ClasspathResolver(resourceRoot);
+            // URL-style values must be identified before FS.getPath() because Windows rejects the colon in
+            // URI values. Windows drive paths are the exception: C:\\templates is a filesystem path, not a URI.
+            final URI dirUri = !isWindowsDrivePath(templateDirectory) && hasUriScheme(templateDirectory) ? new URI(templateDirectory) : null;
+            if (dirUri != null && dirUri.getScheme() != null) {
+                if (dirUri.getScheme().equals("classpath")) {
+                    final String path         = dirUri.getPath() == null ? dirUri.getRawSchemeSpecificPart() : dirUri.getPath();
+                    final String resourceRoot = path.startsWith("/") ? path.substring(1) : path;
+                    getLog().debug(messagePrefix + ": use ClasspathResolver with resourceRoot: " + resourceRoot);
+                    return new ClasspathResolver(resourceRoot);
+                } else {
+                    getLog().debug(messagePrefix + ": use URI resolver with resourceRoot: " + dirUri);
+                    return createUriResolver(dirUri);
+                }
+            }
+
+            final Path configuredPath = FS.getPath(templateDirectory);
+            if (configuredPath.isAbsolute()) {
+                return requireFileResolver(createFileResolver(configuredPath));
             } else {
-                getLog().debug(messagePrefix + ": use DefaultResolver with resourceRoot: " + dirUri.getPath());
-                return new DefaultResolver(dirUri.getPath());
+                final Path projectTemplateDirectory = project.getBasedir().toPath().resolve(configuredPath).normalize();
+                MustacheResolver mustacheResolver = createFileResolver(projectTemplateDirectory);
+                if (mustacheResolver != null) {
+                    return mustacheResolver;
+                }
+                return createFileResolverFromDefaultRoots(configuredPath);
             }
         } catch (URISyntaxException e1) {
-            throw new TemplatingMojoFailureException("Bad URI: " + mainTemplate, e1);
+            throw new TemplatingMojoFailureException("Bad template directory URI: " + templateDirectory, e1);
         }
     }
 
-    private MustacheResolver createFileResolver(Path templateRootCandidate) {
-        if (!Files.isDirectory(templateRootCandidate)) {
-            getLog().debug("  checked possible base dir (doesn't exist): " + templateRootCandidate);
+    private boolean isWindowsDrivePath(String path) {
+        return path.length() >= 2 && Character.isLetter(path.charAt(0)) && path.charAt(1) == ':';
+    }
+
+    private boolean hasUriScheme(String value) {
+        if (value.isEmpty() || !Character.isLetter(value.charAt(0))) {
+            return false;
+        }
+        for (int i = 1; i < value.length(); i++) {
+            final char character = value.charAt(i);
+            if (character == ':') {
+                return true;
+            }
+            if (!Character.isLetterOrDigit(character) && character != '+' && character != '-' && character != '.') {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private MustacheResolver createFileResolverFromDefaultRoots() {
+        for (String defaultDir : templateRootDirs) {
+            MustacheResolver mustacheResolver = createFileResolver(project.getBasedir().toPath().resolve(defaultDir));
+            if (mustacheResolver != null) {
+                return mustacheResolver;
+            }
+        }
+        throw new TemplatingMojoFailureException("Cannot locate template: " + mainTemplate);
+    }
+
+    private MustacheResolver createFileResolverFromDefaultRoots(Path relativeTemplateDirectory) {
+        for (String defaultDir : templateRootDirs) {
+            final Path templateDirectory = project.getBasedir().toPath().resolve(defaultDir).resolve(relativeTemplateDirectory).normalize();
+            MustacheResolver mustacheResolver = createFileResolver(templateDirectory);
+            if (mustacheResolver != null) {
+                return mustacheResolver;
+            }
+        }
+        throw new TemplatingMojoFailureException("Cannot locate template: " + mainTemplate);
+    }
+
+    private MustacheResolver requireFileResolver(MustacheResolver mustacheResolver) {
+        if (mustacheResolver == null) {
+            throw new TemplatingMojoFailureException("Cannot locate template: " + mainTemplate);
+        }
+        return mustacheResolver;
+    }
+
+    private MustacheResolver createFileResolver(Path templateDirectoryPath) {
+        if (!Files.isDirectory(templateDirectoryPath)) {
+            getLog().debug("  checked possible template dir (doesn't exist): " + templateDirectoryPath);
             return null;
         }
-        final Path resolvedTemplateDir = templateDirectory == null ? templateRootCandidate : templateRootCandidate.resolve(templateDirectory);
-        if (!Files.isDirectory(resolvedTemplateDir)) {
-            getLog().debug("  checked possible template root dir (doesn't exist): " + templateRootCandidate);
-            return null;
-        }
-        final Path mainTemplateFullPath = templateRootCandidate.resolve(mainTemplate);
+        final Path mainTemplateFullPath = templateDirectoryPath.resolve(mainTemplate);
 
         if (!Files.isRegularFile(mainTemplateFullPath)) {
-            getLog().debug("  possible template root dir exists: " + templateRootCandidate);
+            getLog().debug("  possible template dir exists: " + templateDirectoryPath);
             getLog().debug("  but template doesn't: " + mainTemplateFullPath);
             return null;
         }
-        getLog().info("Template found in dir: " + templateRootCandidate);
-        return new FileSystemResolver(resolvedTemplateDir.toFile());
+        getLog().info("Template found in dir: " + templateDirectoryPath);
+        return new FileSystemResolver(templateDirectoryPath.toFile());
+    }
+
+    private MustacheResolver createUriResolver(URI templateDirectoryUri) {
+        final URI directoryUri = withTrailingSlash(templateDirectoryUri);
+        final MustacheResolver resolver = resourceName -> openUri(resolveUri(directoryUri, resourceName));
+
+        try (Reader reader = resolver.getReader(mainTemplate)) {
+            if (reader == null) {
+                throw new TemplatingMojoFailureException("Cannot locate template: " + resolveUri(directoryUri, mainTemplate));
+            }
+        } catch (IOException e) {
+            throw new TemplatingMojoFailureException("Cannot read template: " + resolveUri(directoryUri, mainTemplate), e);
+        }
+        return resolver;
+    }
+
+    private Reader openUri(URI resourceUri) {
+        try {
+            final URLConnection connection = resourceUri.toURL().openConnection();
+            // In particular, do not leave JarFiles cached: Windows cannot delete a cached JAR.
+            connection.setUseCaches(false);
+            return new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            getLog().debug("Cannot read template URL: " + resourceUri, e);
+            return null;
+        }
+    }
+
+    private URI resolveUri(URI directoryUri, String resourceName) {
+        if (!directoryUri.isOpaque()) {
+            return directoryUri.resolve(resourceName);
+        }
+        return URI.create(directoryUri.getScheme() + ":" + directoryUri.getRawSchemeSpecificPart() + resourceName);
+    }
+
+    private URI withTrailingSlash(URI directoryUri) {
+        if (directoryUri.isOpaque()) {
+            final String schemeSpecificPart = directoryUri.getRawSchemeSpecificPart();
+            if (schemeSpecificPart.endsWith("/")) {
+                return directoryUri;
+            }
+            return URI.create(directoryUri.getScheme() + ":" + schemeSpecificPart + "/");
+        }
+        final String path = directoryUri.getPath();
+        if (path == null || path.endsWith("/")) {
+            return directoryUri;
+        }
+        try {
+            return new URI(directoryUri.getScheme(), directoryUri.getUserInfo(), directoryUri.getHost(), directoryUri.getPort(),
+                    path + "/", directoryUri.getQuery(), directoryUri.getFragment());
+        } catch (URISyntaxException e) {
+            throw new TemplatingMojoFailureException("Bad template directory URI: " + directoryUri, e);
+        }
     }
 
     private void createDirIfRequired(final Path outputDirectoryPath) throws MojoExecutionException {
