@@ -99,7 +99,7 @@ public class LoadableEntities {
         }
 
         public URI getFullPath() {
-            return rootPath.resolve(relativePath);
+            return rootPath.resolve(relativePath.replace(fileSystem.getSeparator(), "/"));
         }
 
         /**
