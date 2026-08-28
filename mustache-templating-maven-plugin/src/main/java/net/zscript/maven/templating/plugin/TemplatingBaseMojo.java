@@ -136,13 +136,17 @@ abstract class TemplatingBaseMojo extends AbstractMojo {
         }
         getLog().info("outputDir: " + outputDirectory);
 
-        final Path outputDirectoryPath = outputDirectory.toPath();
+        final Path outputDirectoryPath = outputDirectory.toPath().toAbsolutePath().normalize();
         createDirIfRequired(outputDirectoryPath);
 
         // This is the important bit: iterates the contexts and performs the actual Mustache templating.
         for (LoadedEntityScopes context : loadedMappedScopes) {
             try {
-                final Path outputFileFullPath = outputDirectoryPath.resolve(context.getRelativeOutputPath());
+                final Path outputFileFullPath = outputDirectoryPath.resolve(context.getRelativeOutputPath()).normalize();
+                if (!outputFileFullPath.startsWith(outputDirectoryPath)) {
+                    throw new MojoExecutionException("Generated output path escapes outputDirectory: "
+                            + context.getRelativeOutputPath() + " (outputDirectory: " + outputDirectoryPath + ")");
+                }
                 final Path outputParentDir    = outputFileFullPath.getParent();
                 createDirIfRequired(outputParentDir);
                 final Mustache mustache = mustacheFactory.compile(mainTemplate);
