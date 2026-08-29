@@ -18,7 +18,7 @@
 
     <organization>
         <name>Zscript Team</name>
-        <url>http://zscript.net/</url>
+        <url>https://zscript.net/</url>
     </organization>
 
     <licenses>
@@ -93,7 +93,7 @@
         <version.maven-enforcer-plugin>3.6.3</version.maven-enforcer-plugin>
         <version.maven-gpg-plugin>3.2.8</version.maven-gpg-plugin>
         <version.maven-release-plugin>3.3.1</version.maven-release-plugin>
-        <version.maven-nexus-staging-plugin>1.7.0</version.maven-nexus-staging-plugin>
+        <version.maven-central-publishing-plugin>0.11.0</version.maven-central-publishing-plugin>
         <version.maven-invoker-plugin>3.10.1</version.maven-invoker-plugin>
         <version.maven-jar-plugin>3.5.1</version.maven-jar-plugin>
         <skipITs>false</skipITs>
@@ -285,15 +285,14 @@
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>${version.maven-nexus-staging-plugin}</version>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>${version.maven-central-publishing-plugin}</version>
                     <extensions>true</extensions>
                     <configuration>
-                        <serverId>ossrh</serverId>
-                        <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                        <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                        <stagingProgressTimeoutMinutes>60</stagingProgressTimeoutMinutes>
+                        <!-- Must match the server ID in settings.xml -->
+                        <publishingServerId>central</publishingServerId>
+                        <autoPublish>false</autoPublish>
                     </configuration>
                 </plugin>
             </plugins>
@@ -310,17 +309,6 @@
             </plugin>
         </plugins>
     </build>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
 
     <profiles>
         <profile>
@@ -341,6 +329,10 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>
